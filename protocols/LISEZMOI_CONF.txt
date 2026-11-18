@@ -1,0 +1,417 @@
+===============================================================================================
+ SerialHex - FICHIERS DE PROTOCOLE ET DE COMMANDES : TOUTES LES CLÉS ET VALEURS POSSIBLES
+ (English version: README_CONF.txt)
+===============================================================================================
+
+Ce dossier contient un fichier .json par protocole. SerialHex lit la structure des trames dans
+ce fichier : on décrit un nouvel appareil sans toucher au code. Les commandes de l'appareil
+(nom, données envoyées / reçues, unités) sont dans des fichiers msgLibrary/msgList/…/Msg_*.json.
+
+Documentation détaillée, avec plus d'exemples : docs/Francais/CONF_PROTOCOLE.md et docs/Francais/PROTOCOLE.md.
+
+Sommaire
+   1. Règles d'écriture
+   2. Squelette d'un fichier de protocole
+   3. Clés du fichier
+   4. Clés d'un champ
+   5. Rôles d'un champ ("role")
+   6. Tailles et positions (octets / bits)
+   7. CRC et sommes ("crc", "algo", "over")
+   8. Plusieurs formats de trame ("variants")
+   9. Codage sur la ligne ("encoding")
+  10. Couleurs ("color")
+  11. Textes lisibles (description, values, categories, errors)
+  12. Fichiers de commandes Msg_*.json
+  13. Exemples complets
+  14. Fichiers fournis
+
+
+-----------------------------------------------------------------------------------------------
+ 1. RÈGLES D'ÉCRITURE
+-----------------------------------------------------------------------------------------------
+
+  - JSON en UTF-8. Les commentaires sont acceptés :   // jusqu'à la fin de la ligne
+                                                      /* sur plusieurs lignes */
+    (un // à l'intérieur d'une chaîne, comme "http://...", n'est pas un commentaire)
+  - Nombres en décimal (83) ou en texte hexa / binaire ("0x7E", "0b0101").
+  - Une clé qui vaut null est ignorée : on peut lister toutes les clés d'un champ, remplir
+    celles qui servent et mettre les autres à null :
+      {"name": "SYNC", "size": 1, "role": "value", "value": "0x7E", "LENb": null, "if": null}
+  - Un fichier invalide est signalé dans le moniteur avec la raison exacte (nom du champ,
+    clé en cause) ; SerialHex utilise alors son protocole générique intégré.
+  - Bouton « Recharger » (onglet Manuel) : relit le fichier après une modification.
+
+
+-----------------------------------------------------------------------------------------------
+ 2. SQUELETTE D'UN FICHIER DE PROTOCOLE
+-----------------------------------------------------------------------------------------------
+
+  {
+    "name": "Mon appareil",                  // nom affiché dans la liste des protocoles
+    "description": "…", "description_en": "…",
+    "byte_order": "big",                     // ordre des octets des champs de plus d'un octet
+    "bit_order": "msb",                      // numérotation des bits (champs en bits)
+    "encoding": "binary",                    // codage sur la ligne
+    "crc": { "modbus": "crc16_modbus" },     // CRC nommés, utilisés par "algo"
+    "categories": { "LAS": {"fr": "…", "en": "…"} },
+    "tx": [ champ, champ, … ],               // trame de REQUÊTE (envoyée)
+    "rx": [ champ, champ, … ],               // trame de RÉPONSE (reçue)
+    "errors": { "0": "OK", "4": "Commande inconnue" },
+    "commands": "../messages"                // dossier des Msg_*.json, relatif à ce fichier
+  }
+
+  Un champ :
+    { "name": "COMMAND ID", "size": 4, "role": "command_id", "color": "cmd",
+      "description": "Identifiant de la commande" }
+
+
+-----------------------------------------------------------------------------------------------
+ 3. CLÉS DU FICHIER
+-----------------------------------------------------------------------------------------------
+
+  Clé              Obligatoire   Valeurs possibles                       Défaut
+  ---------------  ------------  --------------------------------------  -------------------
+  name             non           texte                                   nom du fichier
+  description      non           texte (français)                        ""
+  description_en   non           texte (anglais)                         ""
+  byte_order       non           "little" | "big"                        "little"
+  bit_order        non           "msb" | "lsb"                           "msb"
+  encoding         non           "binary" | {"type": "ascii_hex", …}     "binary"
+  crc              non           {nom: préréglage ou définition}         {}
+  categories       non           {code: texte ou {"fr", "en"}}           {}
+  tx               OUI           liste de champs | {"variants": [...]}
+  rx               OUI           liste de champs | {"variants": [...]}
+  errors           non           {code: texte ou {"fr", "en"}}           {}
+  commands         non           chemin relatif ("../messages")          pas de commandes
+  _comment         non           texte libre (ignoré)
+
+  byte_order
+    "little"  poids faible en premier : 0x1234 -> 34 12   (Intel, M-Bus, CRC Modbus)
+    "big"     poids fort en premier   : 0x1234 -> 12 34   (registres Modbus, ordre réseau)
+    Vaut pour tous les champs numériques et les CRC ; "order" sur un champ le remplace.
+
+  bit_order (seulement pour les champs qui ne font pas des octets entiers, voir §6)
+    "msb"     bit 0 = bit de poids fort de l'octet 0 ; un champ se lit poids fort en premier
+    "lsb"     bit 0 = bit de poids faible de l'octet 0 ; un champ se lit poids faible en premier
+
+
+-----------------------------------------------------------------------------------------------
+ 4. CLÉS D'UN CHAMP
+-----------------------------------------------------------------------------------------------
+
+  Clé              Pour les rôles          Valeurs                          Rôle
+  ---------------  ----------------------  -------------------------------  -------------------
+  name             tous (OBLIGATOIRE)      texte unique dans tx (ou rx)     nom, sert de référence
+  role             tous                    voir §5                          ce que représente le champ
+  size / LENO      tous                    octets : 0 à 4 (na 0-255,        taille en OCTETS
+                                           data 0-65535) ; 0 = absent
+  LENb             tous sauf data, crc     bits : 0 à 32                    taille en BITS
+  at / atO         tous                    n° d'octet | "start" | "end"     position en octets
+  atb              tous                    n° de bit                        position en bits
+  after            tous                    nom d'un champ                   juste après ce champ
+  value            value                   entier                           valeur fixe attendue
+  default          field                   entier                           valeur à l'envoi
+  fill             na                      0 à 255                          octet écrit à l'envoi
+  of               length                  nom ou liste de noms             champs comptés
+  algo             crc                     nom (section "crc" ou §7)        algorithme
+  over             crc                     [début, fin]                     octets couverts
+  order            numériques, crc         "little" | "big"                 ordre propre au champ
+  if               tous                    nom d'un champ                   présent si ce champ l'est
+  same_as          copy                    nom d'un champ précédent         champ recopié
+  color            tous                    "hdr" | "cmd" | "crc" | "na" |   couleur
+                                           "#RRGGBB"
+  description      tous                    texte                            colonne Description
+  description_en   tous                    texte                            idem, en anglais
+  values           numériques              {valeur: texte ou {"fr","en"}}   sens de chaque valeur
+  category         tous                    texte                            étiquette libre
+
+  Rôle par défaut : "value" si la clé value est donnée, sinon "field".
+  Une seule taille (size ou LENb) et une seule position (at ou atb ou after) par champ.
+
+
+-----------------------------------------------------------------------------------------------
+ 5. RÔLES D'UN CHAMP ("role")
+-----------------------------------------------------------------------------------------------
+
+  Rôle         Un seul ?  À l'envoi                          À la réception
+  -----------  ---------  ---------------------------------  -----------------------------------
+  value        non        écrit "value"                      vérifie ; rouge si différent.
+                                                             Les octets fixes du début servent à
+                                                             reconnaître les trames du protocole
+  request_id   oui        valeur saisie (REQUEST ID)         rattache la réponse à sa requête,
+                                                             timeout de réponse, « réponse #0x05 »
+  command_id   oui        COMMAND ID de la commande          choisit la commande pour décoder DATA
+  length       oui        calculée : taille des champs "of"  donne la taille de DATA
+  error        oui        valeur fournie (0)                 fond vert à 0, rouge sinon ; texte
+                                                             d'après "errors"
+  crc          non        calculé en dernier                 vérifié ; rouge + « attendu XX » si faux
+  data         oui        données de la commande             découpées selon la commande
+  field        non        "default" ou valeur fournie        affiché, sans contrôle
+  na           non        "fill" (octets non lus)            ignoré : gris barré, « non lu »
+  copy         non        recopie le champ "same_as"         vérifie l'égalité (longueur répétée)
+
+  Exemples :
+    {"name": "SYNC", "size": 1, "role": "value", "value": "0x7E"}
+    {"name": "RÉSERVÉ", "size": 2, "role": "na", "fill": "0xFF"}
+    {"name": "L (répété)", "size": 1, "role": "copy", "same_as": "L"}
+
+
+-----------------------------------------------------------------------------------------------
+ 6. TAILLES ET POSITIONS (OCTETS / BITS)
+-----------------------------------------------------------------------------------------------
+
+  "size": 1  =  "LENO": 1  =  "LENb": 8          "at": 2  =  "atO": 2  =  "atb": 16
+
+  Taille de DATA :
+    - un champ "length" avec "of": "DATA" (placé avant DATA)  -> taille donnée par la trame
+    - "of": ["DATA", "CRC"]                                   -> la longueur compte aussi le CRC
+    - "size": 10 sur DATA                                     -> taille fixe
+    - ni size ni longueur                                     -> le reste de la trame (Modbus RTU)
+
+  Placement (par défaut, les champs se suivent dans l'ordre de la liste) :
+    "at": 6         commence à l'octet 6 ; les octets libres avant deviennent des octets non lus
+    "at": "start"   en tête de trame          "at": "end"   en fin de trame (CRC final)
+    "after": "LEN"  juste après le champ LEN
+    "atb": 12       commence au bit 12 (bit 4 de l'octet 1)
+
+  Champs en bits : DATA et les CRC commencent sur un octet ; un champ "if" fait des octets
+  entiers ; la trame finit sur un octet entier ; les champs comptés par une longueur font
+  ensemble des octets entiers.
+    Exemple (octet de fonction Modbus en réponse : 1 bit d'exception + 7 bits de fonction) :
+      {"name": "EXCEPTION", "LENb": 1, "role": "value", "value": 0},
+      {"name": "FONCTION",  "LENb": 7, "role": "command_id"}
+
+  Condition "if": "NOM" : le champ n'existe que si NOM est présent et non vide (DATA) ou non
+  nul (champ numérique). Ex. : "DATA CRC" avec "if": "DATA".
+
+
+-----------------------------------------------------------------------------------------------
+ 7. CRC ET SOMMES ("crc", "algo", "over")
+-----------------------------------------------------------------------------------------------
+
+  Préréglages (utilisables directement dans "algo", ou dans la section "crc") :
+
+  Nom                 Taille  poly        init        refin/out  xorout      Usage
+  ------------------  ------  ----------  ----------  ---------  ----------  ------------------
+  crc16_modbus        16      0x8005      0xFFFF      oui        0           Modbus RTU
+  crc16_ccitt_false   16      0x1021      0xFFFF      non        0           protocoles série
+  crc16_xmodem        16      0x1021      0x0000      non        0           XMODEM
+  crc16_kermit        16      0x1021      0x0000      oui        0           Kermit
+  crc8                8       0x07        0x00        non        0           SMBus
+  crc8_maxim          8       0x31        0x00        oui        0           1-Wire
+  crc32               32      0x04C11DB7  0xFFFFFFFF  oui        0xFFFFFFFF  zip, Ethernet
+  crc32_mpeg2         32      0x04C11DB7  0xFFFFFFFF  non        0           STM32
+  sum8                8       somme des octets modulo 256                    M-Bus, PROFIBUS
+  sum8_2c             8       complément à 2 de la somme                     LRC Modbus ASCII
+  xor8                8       XOR de tous les octets                         NMEA
+  sum16               16      somme des octets modulo 65536
+
+  Section "crc" : trois écritures
+    "crc": {
+      "a": "crc16_modbus",                                          // préréglage
+      "b": {"preset": "crc16_ccitt_false"},                          // idem
+      "c": {"width": 16, "poly": "0x1021", "init": "0xFFFF",          // définition complète
+            "refin": false, "refout": false, "xorout": "0x0000"}
+    }
+    width : 8, 16 ou 32. refin / refout : true = octets lus bit de poids faible en premier
+    (« réfléchi »). Le polynôme Modbus souvent noté 0xA001 est 0x8005 réfléchi.
+
+  "over": [début, fin], bornes incluses
+    début : n° d'octet, ou nom de champ (son premier octet)
+    fin   : n° d'octet, nom de champ (son dernier octet), ou "end" (juste avant le CRC)
+    absent = [0, "end"]
+    Ex. : ["SYNC", "LEN"]             ["DATA", "DATA"]   [1, "end"]   [0, 10]
+
+
+-----------------------------------------------------------------------------------------------
+ 8. PLUSIEURS FORMATS DE TRAME ("variants")
+-----------------------------------------------------------------------------------------------
+
+  Pour un protocole qui a plusieurs formats, reconnus à leurs octets fixes (M-Bus : E5 /
+  trame courte 10 / trame longue 68 ; PROFIBUS : SD1 à SD4 ; réponse normale / exception) :
+
+    "rx": { "variants": [
+      { "name": "Accusé", "description": "…", "description_en": "…",
+        "fields": [ {"name": "ACK", "size": 1, "role": "value", "value": "0xE5"} ] },
+      { "name": "Longue",
+        "fields": [ {"name": "START", "size": 1, "role": "value", "value": "0x68"}, … ] }
+    ]}
+
+  - name obligatoire et unique ; chaque variante a sa liste de champs complète.
+  - Réception : variante choisie d'après les octets fixes.
+  - Envoi : liste « Format » de l'onglet Protocole, ou clé "variant" de la commande.
+
+
+-----------------------------------------------------------------------------------------------
+ 9. CODAGE SUR LA LIGNE ("encoding")
+-----------------------------------------------------------------------------------------------
+
+  "encoding": "binary"                       octets envoyés tels quels (défaut)
+  "encoding": {"type": "ascii_hex",          chaque octet en 2 caractères hexa ASCII
+               "start": ":",                 début de trame
+               "end": "\r\n",                fin de trame (découpe aussi les trames reçues)
+               "lowercase": false}           hexa en minuscules ?
+
+  Les champs, longueurs et CRC portent sur la trame binaire.
+  Ex. Modbus ASCII : 01 03 00 00 00 0A + LRC F2  ->  :01030000000AF2<CR><LF>
+
+
+-----------------------------------------------------------------------------------------------
+ 10. COULEURS ("color")
+-----------------------------------------------------------------------------------------------
+
+  "hdr"       gris clair         octets fixes, adresses, numéros (en-tête)
+  "cmd"       gras               identifiant de commande
+  "crc"       vert pastel        CRC et sommes (rouge si faux)
+  "na"        gris barré         octets non lus (défaut du rôle na)
+  "#FF8800"   cette couleur      un champ à repérer
+  (absent)    couleur de ligne   TX bleu, RX violet
+
+  Le rôle error est toujours sur fond vert (0) ou rouge (autre valeur). Les couleurs hdr, cmd,
+  crc, na, TX, RX se règlent dans l'interface (bouton « Couleurs… »).
+
+
+-----------------------------------------------------------------------------------------------
+ 11. TEXTES LISIBLES (description, values, categories, errors)
+-----------------------------------------------------------------------------------------------
+
+  Sans effet sur les octets ; affichés dans les tableaux et le moniteur. Un texte peut être
+  une chaîne, ou {"fr": "…", "en": "…"} pour suivre la langue de l'interface.
+
+    "description": "Code fonction Modbus", "description_en": "Modbus function code"
+    "values": { "0x03": {"fr": "Lecture de registres", "en": "Read Holding Registers"},
+                "0x06": "Écriture d'un registre" }
+        -> affichage « 3 (0x03) Lecture de registres »
+    "categories": { "READ": {"fr": "Lecture", "en": "Read"},
+                    "WRITE": "Écriture" }
+        -> une commande avec "group": "READ" affiche « Lecture — … »
+    "errors": { "0": "OK", "2": {"fr": "Adresse invalide", "en": "Illegal data address"} }
+        -> « erreur 2 (Adresse invalide) » en rouge dans le moniteur
+
+
+-----------------------------------------------------------------------------------------------
+ 12. FICHIERS DE COMMANDES Msg_*.json
+-----------------------------------------------------------------------------------------------
+
+  Fichier :
+    "protocol"  : nom du protocole visé, ou liste ; absent = tous les protocoles
+    "group"     : catégorie par défaut des commandes (ex. "LAS", "COM", "READ")
+    "hidden"    : true = toutes les commandes du fichier masquées (voir "hidden" ci-dessous)
+    "commands"  : liste de commandes
+    "errors"    : {code: texte ou {"fr", "en"}}
+    "messages"  : trames libres de l'onglet Manuel (voir docs/Francais/MESSAGES.md)
+
+  Commande :
+    Clé             Obligatoire  Rôle
+    --------------  -----------  ---------------------------------------------------------------
+    name            OUI          nom affiché
+    id              OUI          COMMAND ID ("0x80000004", "0x03")
+    name_en         non          nom en anglais
+    description     non          texte affiché sous la commande ; description_en en anglais
+    group           non          catégorie (texte lisible dans "categories" du protocole)
+    tx              non          champs de DATA de la requête ([] = pas de données)
+    rx              non          champs de DATA de la réponse
+    presets         non          [{"name": "50 %", "values": {"champ": valeur}}]
+    variant         non          format de trame de la requête (§8)
+    header          non          valeurs de champs d'en-tête : {"CI": "0x52"} ; distingue des
+                                 commandes au même COMMAND ID
+    match           non          valeurs de champs tx qui distinguent des commandes au même
+                                 COMMAND ID : {"register": "0x0010"} (Modbus). Une commande
+                                 sans match au même COMMAND ID sert de repli (fonction générique)
+    attributes      non          champs libres affichés : {"access": "R", "level": "expert"}
+    hidden          non          true = commande masquée : absente des listes de l'onglet
+                                 Protocole (sauf case « Masquées » cochée), mais reconnue au
+                                 décodage. Commandes obsolètes, internes, ou commentées dans le
+                                 code de l'appareil. Peut partager son COMMAND ID avec une
+                                 commande visible (la visible est prioritaire). Ex. :
+                                 {"name": "Ancienne mesure", "id": "0x0C", "hidden": true}
+
+  Champ (dans tx / rx) :
+    Clé          Valeurs                                     Rôle
+    -----------  ------------------------------------------  ---------------------------------
+    name         texte (OBLIGATOIRE)                         nom
+    label        texte                                       libellé affiché ; label_en anglais
+    type         voir ci-dessous                             format des données
+    count        entier >= 1                                 tableau (raw : nombre d'octets)
+    length       entier                                      ascii / hex / bcd : taille en octets
+    unit         texte                                       unité affichée
+    factor       nombre (≠ 0)                                valeur réelle = brut × factor + offset
+    offset       nombre
+    min / max    nombre (unité réelle)                       plage ; null = limites du type
+    default      valeur                                      valeur par défaut (requête)
+    decimals     entier                                      décimales affichées
+    format       "ip" | "mac"                                saisie / affichage d'un tableau
+    choices      {"libellé": valeur}                         liste de choix (valeur décimale ou
+                                                             "0xFF00")
+    bits         {"n° de bit": "nom"}                        champ de bits : bits à 1 listés
+
+  Types :
+    uint8 / u8 / U8     int8 / i8        1 octet
+    uint16 / u16        int16 / i16      2 octets, ordre du protocole
+    uint32 / u32        int32 / i32      4 octets, ordre du protocole
+    uint16be, int32le…                   ordre des octets forcé pour ce champ
+    float / f32                          flottant IEEE 754, 4 octets
+    bool                                 1 octet, 0 / 1
+    ascii                                texte ("length" octets, ou variable en dernier)
+    raw / hex                            octets bruts en hexa ("count" octets, ou variable)
+    bcd                                  chiffres décimaux, 2 par octet ("length", 4 par défaut)
+    enum                                 ancienne écriture d'un choix ("size" + "choices")
+    U8[4], F32[2]…                       tableau écrit dans le type (= "count")
+
+
+-----------------------------------------------------------------------------------------------
+ 13. EXEMPLES COMPLETS
+-----------------------------------------------------------------------------------------------
+
+  Exemple 1 : protocole minimal (synchro, numéro, commande, longueur, données, CRC16)
+
+    {
+      "name": "Exemple",
+      "byte_order": "big",
+      "tx": [
+        {"name": "SYNC", "size": 2, "role": "value", "value": "0xAA55", "color": "hdr"},
+        {"name": "SEQ",  "size": 1, "role": "request_id", "color": "hdr"},
+        {"name": "CMD",  "size": 1, "role": "command_id", "color": "cmd"},
+        {"name": "LEN",  "size": 1, "role": "length", "of": "DATA"},
+        {"name": "DATA", "role": "data"},
+        {"name": "CRC",  "size": 2, "role": "crc", "algo": "crc16_ccitt_false", "over": [2, "end"]}
+      ],
+      "rx": [
+        {"name": "SYNC",   "size": 2, "role": "value", "value": "0xAA55", "color": "hdr"},
+        {"name": "SEQ",    "size": 1, "role": "request_id", "color": "hdr"},
+        {"name": "STATUT", "size": 1, "role": "error"},
+        {"name": "LEN",    "size": 1, "role": "length", "of": "DATA"},
+        {"name": "DATA",   "role": "data"},
+        {"name": "CRC",    "size": 2, "role": "crc", "algo": "crc16_ccitt_false", "over": [2, "end"]}
+      ],
+      "errors": {"0": "OK", "1": "Commande inconnue"}
+    }
+
+  Exemple 2 : commande Modbus « lire 2 registres » (msgLibrary/msgList/modbus/Msg_Regulateur_Exemple.json)
+
+    {
+      "name": "Lire consigne et mode", "name_en": "Read setpoint and mode",
+      "id": "0x03", "group": "READ",
+      "match": {"register": "0x0000"},
+      "tx": [
+        {"name": "register", "label": "Registre", "type": "uint16", "default": "0x0000"},
+        {"name": "quantity", "label": "Nombre",   "type": "uint16", "default": 2}
+      ],
+      "rx": [
+        {"name": "bytes",    "label": "Nombre d'octets", "type": "uint8"},
+        {"name": "setpoint", "label": "Consigne", "type": "int16", "factor": 0.1, "unit": "°C"},
+        {"name": "mode",     "label": "Mode", "type": "uint16",
+         "choices": {"arrêt": 0, "auto": 1, "manuel": 2}}
+      ]
+    }
+    Requête : 01 03 00 00 00 02 C4 0B      Réponse : 01 03 04 00 E6 00 01 DA 04
+    -> Consigne = 23.0 °C | Mode = auto (1)
+
+
+-----------------------------------------------------------------------------------------------
+ 14. FICHIERS FOURNIS
+-----------------------------------------------------------------------------------------------
+
+  Les fichiers .json de ce dossier sont des exemples commentés ligne à ligne ; leur liste et
+  leur rôle sont dans le README du projet. Le protocole générique intégré à SerialHex est
+  décrit dans core/protocol/default.py.

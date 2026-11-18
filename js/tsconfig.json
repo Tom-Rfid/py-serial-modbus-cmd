@@ -1,0 +1,39 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": [
+      "ES2020",
+      "DOM"
+    ],
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "types": [
+      "node"
+    ],
+    "paths": {
+      "serialhex": [
+        "./src/index.ts"
+      ],
+      "serialhex/react": [
+        "./src/react/index.ts"
+      ],
+      "serialhex/electron/main": [
+        "./src/electron/main.ts"
+      ],
+      "serialhex/electron/preload": [
+        "./src/electron/preload.ts"
+      ]
+    }
+  },
+  "include": [
+    "src",
+    "test",
+    "examples"
+  ]
+}

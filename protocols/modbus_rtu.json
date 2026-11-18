@@ -1,0 +1,171 @@
+// =============================================================================================
+//  Modbus RTU  —  protocole public / public protocol
+// ---------------------------------------------------------------------------------------------
+//  FR : Liaison série RS-485 / RS-232. Trame binaire : ADRESSE, FONCTION, DONNÉES, CRC16.
+//       Pas de longueur dans la trame : DATA = tout ce qui est entre FONCTION et le CRC.
+//       La fin de trame se détecte par un silence de 3,5 caractères (réglage « délai fin de trame »
+//       du moniteur : 5 ms suffisent à 9600 bauds et plus).
+//  EN : RS-485 / RS-232 serial line. Binary frame: ADDRESS, FUNCTION, DATA, CRC16.
+//       No length field: DATA = everything between FUNCTION and the CRC.
+//       End of frame = 3.5 character silence (monitor "end of frame gap": 5 ms is enough
+//       at 9600 baud and above).
+//
+//  Exemples de trames / example frames (esclave / slave 1) :
+//    TX 01 03 00 00 00 02 C4 0B           lecture de 2 registres à partir de 0 / read 2 registers from 0
+//    RX 01 03 04 00 E6 01 2C 1B 89        2 registres : 0x00E6, 0x012C / 2 registers
+//    RX 01 83 02 C0 F1                    exception 2 : adresse invalide / illegal data address
+//
+//  Toutes les options : LISEZMOI_CONF.txt (même dossier)  /  All options: README_CONF.txt
+//  Ce fichier accepte les commentaires // et /* */ (JSON with comments, comme VS Code).
+//  This file accepts // and /* */ comments (JSON with comments, like VS Code).
+// =============================================================================================
+{
+  "name": "Modbus RTU",
+  "description": "Modbus RTU : adresse, fonction, données, CRC16 Modbus (CRC poids faible en premier)",
+  "description_en": "Modbus RTU: address, function, data, CRC16 Modbus (CRC low byte first)",
+
+  // Ordre des octets des champs de plus d'un octet : registres Modbus en big endian.
+  // Byte order of multi-byte fields: Modbus registers are big endian.
+  "byte_order": "big",
+  // Numérotation des bits dans un octet (champs en bits ci-dessous) : msb = bit de poids fort en premier.
+  // Bit numbering inside a byte (bit fields below): msb = most significant bit first.
+  "bit_order": "msb",
+  // Codage sur la ligne : "binary" (octets tels quels). Voir modbus_ascii.json pour "ascii_hex".
+  // Line encoding: "binary" (raw bytes). See modbus_ascii.json for "ascii_hex".
+  "encoding": "binary",
+
+  // CRC : le préréglage "crc16_modbus" est utilisé directement par son nom dans les champs.
+  // CRC: the "crc16_modbus" preset is used directly by name in the fields.
+  "crc": {},
+
+  // Catégories des commandes (clé "group" des Msg_*.json) : texte affiché dans les deux langues.
+  // Command categories ("group" key of Msg_*.json files): display text in both languages.
+  "categories": {
+    "READ":  {"fr": "Lecture",    "en": "Read"},
+    "WRITE": {"fr": "Écriture",   "en": "Write"},
+    "DIAG":  {"fr": "Diagnostic", "en": "Diagnostics"}
+  },
+
+  // ------------------------------------------------------------------------------------------
+  //  REQUÊTE (maître -> esclave)  /  REQUEST (client -> server)
+  // ------------------------------------------------------------------------------------------
+  "tx": [
+    {
+      "name": "ADRESSE",
+      "size": 1,
+      // request_id : recopié dans la réponse -> sert à rattacher la réponse et à surveiller le timeout.
+      // request_id: echoed in the response -> used to match the reply and watch the timeout.
+      "role": "request_id",
+      "color": "hdr",
+      "description": "Adresse de l'esclave : 1 à 247 ; 0 = diffusion (pas de réponse)",
+      "description_en": "Server (slave) address: 1 to 247; 0 = broadcast (no reply)",
+      "values": {"0": {"fr": "diffusion", "en": "broadcast"}}
+    },
+    {
+      "name": "FONCTION",
+      "size": 1,
+      "role": "command_id",              // identifie la commande / identifies the command
+      "color": "cmd",
+      "description": "Code fonction Modbus",
+      "description_en": "Modbus function code",
+      // Texte de chaque valeur, affiché à côté de la valeur décodée / text shown next to the decoded value
+      "values": {
+        "0x01": {"fr": "Lecture de bobines",                 "en": "Read Coils"},
+        "0x02": {"fr": "Lecture d'entrées TOR",              "en": "Read Discrete Inputs"},
+        "0x03": {"fr": "Lecture de registres de maintien",   "en": "Read Holding Registers"},
+        "0x04": {"fr": "Lecture de registres d'entrée",      "en": "Read Input Registers"},
+        "0x05": {"fr": "Écriture d'une bobine",              "en": "Write Single Coil"},
+        "0x06": {"fr": "Écriture d'un registre",             "en": "Write Single Register"},
+        "0x07": {"fr": "Lecture du statut d'exception",      "en": "Read Exception Status"},
+        "0x08": {"fr": "Diagnostic",                         "en": "Diagnostics"},
+        "0x0B": {"fr": "Compteur d'événements",              "en": "Get Comm Event Counter"},
+        "0x0F": {"fr": "Écriture de bobines",                "en": "Write Multiple Coils"},
+        "0x10": {"fr": "Écriture de registres",              "en": "Write Multiple Registers"},
+        "0x11": {"fr": "Identification de l'esclave",        "en": "Report Server ID"},
+        "0x16": {"fr": "Écriture masquée d'un registre",     "en": "Mask Write Register"},
+        "0x17": {"fr": "Lecture / écriture de registres",    "en": "Read/Write Multiple Registers"},
+        "0x2B": {"fr": "Identification de l'appareil (MEI)", "en": "Read Device Identification (MEI)"}
+      }
+    },
+    {
+      "name": "DATA",
+      "role": "data",                    // taille variable : le reste avant le CRC / variable size: the rest before the CRC
+      "description": "Adresse de registre, quantité, valeurs… selon la fonction",
+      "description_en": "Register address, quantity, values… depending on the function"
+    },
+    {
+      "name": "CRC",
+      "size": 2,
+      "role": "crc",
+      "algo": "crc16_modbus",            // poly 0xA001 (0x8005 réfléchi), init 0xFFFF
+      "over": ["ADRESSE", "DATA"],       // de ADRESSE à DATA inclus / from ADDRESS to DATA included
+      "order": "little",                 // exception Modbus : CRC poids faible en premier / CRC low byte first
+      "color": "crc",
+      "description": "CRC16 Modbus sur toute la trame, octet de poids faible en premier",
+      "description_en": "CRC16 Modbus over the whole frame, low byte first"
+    }
+  ],
+
+  // ------------------------------------------------------------------------------------------
+  //  RÉPONSE (esclave -> maître) : deux formats, reconnus au bit 7 de la fonction
+  //  RESPONSE (server -> client): two formats, recognised by bit 7 of the function code
+  // ------------------------------------------------------------------------------------------
+  "rx": {
+    "variants": [
+      {
+        "name": "Normale",
+        "description": "Réponse normale : bit 7 de la fonction à 0",
+        "description_en": "Normal response: function bit 7 = 0",
+        "fields": [
+          {"name": "ADRESSE", "size": 1, "role": "request_id", "color": "hdr",
+           "description": "Adresse de l'esclave qui répond", "description_en": "Address of the replying server"},
+          // Champ de 1 bit à valeur fixe 0 : c'est lui qui choisit ce format.
+          // 1-bit field with fixed value 0: this is what selects this format.
+          {"name": "EXCEPTION", "LENb": 1, "role": "value", "value": 0, "color": "hdr",
+           "description": "Bit d'exception (0 = réponse normale)", "description_en": "Exception bit (0 = normal response)"},
+          {"name": "FONCTION", "LENb": 7, "role": "command_id", "color": "cmd",
+           "description": "Code fonction recopié", "description_en": "Echoed function code"},
+          {"name": "DATA", "role": "data",
+           "description": "Nombre d'octets + valeurs (lecture), ou écho (écriture)",
+           "description_en": "Byte count + values (read), or echo (write)"},
+          {"name": "CRC", "size": 2, "role": "crc", "algo": "crc16_modbus", "over": ["ADRESSE", "DATA"],
+           "order": "little", "color": "crc"}
+        ]
+      },
+      {
+        "name": "Exception",
+        "description": "Réponse d'erreur : fonction + 0x80, puis code d'exception",
+        "description_en": "Error response: function + 0x80, then exception code",
+        "fields": [
+          {"name": "ADRESSE", "size": 1, "role": "request_id", "color": "hdr"},
+          {"name": "EXCEPTION", "LENb": 1, "role": "value", "value": 1, "color": "hdr",
+           "description": "Bit d'exception (1 = erreur)", "description_en": "Exception bit (1 = error)"},
+          {"name": "FONCTION", "LENb": 7, "role": "command_id", "color": "cmd"},
+          // error : code d'erreur de la réponse -> texte de la table "errors", fond rouge si non nul.
+          // error: response error code -> text from the "errors" table, red background if not zero.
+          {"name": "CODE EXCEPTION", "size": 1, "role": "error",
+           "description": "Code d'exception Modbus", "description_en": "Modbus exception code"},
+          {"name": "CRC", "size": 2, "role": "crc", "algo": "crc16_modbus", "over": ["ADRESSE", "CODE EXCEPTION"],
+           "order": "little", "color": "crc"}
+        ]
+      }
+    ]
+  },
+
+  // Codes d'exception Modbus / Modbus exception codes
+  "errors": {
+    "0x01": {"fr": "Fonction non supportée",                 "en": "Illegal function"},
+    "0x02": {"fr": "Adresse de données invalide",            "en": "Illegal data address"},
+    "0x03": {"fr": "Valeur de données invalide",             "en": "Illegal data value"},
+    "0x04": {"fr": "Défaut de l'esclave",                    "en": "Server device failure"},
+    "0x05": {"fr": "Acquittement (traitement long en cours)", "en": "Acknowledge (long operation in progress)"},
+    "0x06": {"fr": "Esclave occupé",                         "en": "Server device busy"},
+    "0x08": {"fr": "Erreur de parité mémoire",               "en": "Memory parity error"},
+    "0x0A": {"fr": "Passerelle : chemin indisponible",       "en": "Gateway path unavailable"},
+    "0x0B": {"fr": "Passerelle : l'appareil ne répond pas",  "en": "Gateway target device failed to respond"}
+  },
+
+  // Dossier des commandes (Msg_*.json), relatif à ce fichier : exemple d'appareil fictif.
+  // Commands folder (Msg_*.json), relative to this file: example of a fictitious device.
+  "commands": "../msgLibrary/msgList/modbus"
+}

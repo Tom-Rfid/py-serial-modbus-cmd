@@ -1,0 +1,56 @@
+{
+    // Interpréteur Python du projet : celui du .venv créé par setup.bat
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+    // Activation du .venv dans les terminaux
+    // L'extension Python tape la commande d'activation dans le terminal avant que
+    // PowerShell soit prêt : le début est perdu (« Jeton inattendu ')' »), et elle
+    // n'a pas de réglage de délai. On la désactive (ainsi que celle de l'extension
+    // « Python Environments », si elle est installée)...
+    "python.terminal.activateEnvironment": false,
+    "python-envs.terminal.autoActivationType": "off",
+
+    // ... et chaque terminal PowerShell de ce dossier lance lui-même Activate.ps1 au
+    // démarrage (rien n'est tapé, donc pas de course) : l'invite affiche « (.venv) ».
+    // Si .venv n'existe pas encore, un message le rappelle.
+    "terminal.integrated.profiles.windows": {
+        "PowerShell (.venv)": {
+            "source": "PowerShell",
+            "icon": "terminal-powershell",
+            "args": [
+                "-NoExit",
+                "-ExecutionPolicy", "Bypass",
+                "-Command",
+                "if (Test-Path .venv\\Scripts\\Activate.ps1) { . .\\.venv\\Scripts\\Activate.ps1 } else { Write-Host '.venv absent : lancer setup.bat' -ForegroundColor Yellow }"
+            ]
+        }
+    },
+    "terminal.integrated.defaultProfile.windows": "PowerShell (.venv)",
+
+    // Filet de sécurité : python et pip du .venv passent aussi en premier dans le PATH
+    // des terminaux, même si l'activation ci-dessus était bloquée.
+    "terminal.integrated.env.windows": {
+        "VIRTUAL_ENV": "${workspaceFolder}\\.venv",
+        "PATH": "${workspaceFolder}\\.venv\\Scripts;${env:PATH}"
+    },
+
+    // Panneau « Tests » (fiole) : découvre et lance tests/test_*.py
+    "python.testing.unittestEnabled": true,
+    "python.testing.pytestEnabled": false,
+    "python.testing.unittestArgs": ["-v", "-s", "./tests", "-p", "test_*.py"],
+
+    // Les fichiers de messages sont en UTF-8 (accents, °, ²)
+    "files.encoding": "utf8",
+    // Fichiers de protocole et de commandes : JSON avec commentaires (// et /* */),
+    // pour que VS Code ne souligne pas les commentaires en rouge
+    "files.associations": {
+        "**/protocols/*.json": "jsonc",
+        "**/msgLibrary/**/*.json": "jsonc"
+    },
+
+    // Masque les fichiers générés dans l'explorateur
+    "files.exclude": {
+    "**/__pycache__": true,
+    "js/node_modules": true,
+    "js/dist": true
+    }
+}

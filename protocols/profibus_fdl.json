@@ -1,0 +1,189 @@
+// =============================================================================================
+//  PROFIBUS FDL (couche liaison, IEC 61158 / EN 50170)  —  protocole public / public protocol
+// ---------------------------------------------------------------------------------------------
+//  FR : Couche liaison de PROFIBUS DP sur RS-485 (9,6 kbit/s à 12 Mbit/s, 8E1).
+//       Formats de trame, reconnus à leur délimiteur de début (SD) :
+//         SD1  10 DA SA FC FCS 16                    sans données
+//         SD2  68 LE LEr 68 DA SA FC DATA FCS 16     données de longueur variable (LE répété)
+//         SD3  A2 DA SA FC DATA(8) FCS 16            8 octets de données
+//         SD4  DC DA SA                              jeton (entre maîtres)
+//         SC   E5                                    accusé court
+//       FCS = somme sur 8 bits de DA jusqu'à la fin de DATA.
+//       DA / SA : bit 7 = « extension » (des SAP suivent en tête de DATA), bits 0-6 = adresse.
+//       Ce fichier décrit la trame ; il ne gère pas la temporisation du bus (rôle d'un vrai maître).
+//  EN : Data link layer of PROFIBUS DP over RS-485 (9.6 kbit/s to 12 Mbit/s, 8E1).
+//       Frame formats, recognised by their start delimiter (SD):
+//         SD1  10 DA SA FC FCS 16                    no data
+//         SD2  68 LE LEr 68 DA SA FC DATA FCS 16     variable length data (LE repeated)
+//         SD3  A2 DA SA FC DATA(8) FCS 16            8 data bytes
+//         SD4  DC DA SA                              token (between masters)
+//         SC   E5                                    short acknowledge
+//       FCS = 8-bit sum from DA to the end of DATA.
+//       DA / SA: bit 7 = "extension" (SAPs follow at the start of DATA), bits 0-6 = address.
+//       This file describes the frame; it does not handle bus timing (a real master's job).
+//
+//  Exemples / examples (maître / master 2, esclave / slave 5) :
+//    TX 10 05 02 49 50 16                       demande d'état FDL / request FDL status
+//    RX 10 02 05 00 07 16                       esclave prêt / slave ready
+//    TX 68 05 05 68 85 82 6D 3C 3E EE 16        diagnostic DP (SAP 60 -> 62) / DP diagnostics
+//
+//  Toutes les options : LISEZMOI_CONF.txt  /  All options: README_CONF.txt
+// =============================================================================================
+{
+  "name": "PROFIBUS FDL",
+  "description": "PROFIBUS FDL : SD1 / SD2 / SD3 / SD4 / E5, FCS somme sur 8 bits, adresses avec bit d'extension",
+  "description_en": "PROFIBUS FDL: SD1 / SD2 / SD3 / SD4 / E5, 8-bit FCS sum, addresses with extension bit",
+  "byte_order": "big",
+  "bit_order": "msb",                            // bit 7 en premier : DA_EXT puis les 7 bits d'adresse
+  "encoding": "binary",
+
+  "categories": {
+    "FDL": {"fr": "Liaison (FDL)",    "en": "Data link (FDL)"},
+    "DP":  {"fr": "Services DP",      "en": "DP services"}
+  },
+
+  // ------------------------------------------------------------------------------------------
+  //  REQUÊTE (maître -> esclave)  /  REQUEST (master -> slave)
+  //  Champs d'adresse communs : DA_EXT + DA (1 + 7 bits), SA_EXT + SA (1 + 7 bits).
+  // ------------------------------------------------------------------------------------------
+  "tx": {
+    "variants": [
+      {
+        "name": "SD1",
+        "description": "Sans données (demande d'état FDL…)", "description_en": "No data (request FDL status…)",
+        "fields": [
+          {"name": "SD1", "size": 1, "role": "value", "value": "0x10", "color": "hdr"},
+          {"name": "DA_EXT", "LENb": 1, "role": "field", "default": 0, "color": "hdr",
+           "description": "1 = SAP de destination en tête de DATA", "description_en": "1 = destination SAP at the start of DATA"},
+          {"name": "DA", "LENb": 7, "role": "request_id", "color": "hdr",
+           "description": "Adresse de l'esclave (0 à 126 ; 127 = diffusion)", "description_en": "Slave address (0 to 126; 127 = broadcast)"},
+          {"name": "SA_EXT", "LENb": 1, "role": "field", "default": 0, "color": "hdr"},
+          {"name": "SA", "LENb": 7, "role": "field", "default": 2, "color": "hdr",
+           "description": "Adresse du maître", "description_en": "Master address"},
+          {"name": "FC", "size": 1, "role": "command_id", "color": "cmd",
+           "description": "Code fonction : bit 6 = requête, bit 5 = FCB, bit 4 = FCV, bits 0-3 = fonction",
+           "description_en": "Function code: bit 6 = request, bit 5 = FCB, bit 4 = FCV, bits 0-3 = function",
+           "values": {
+             "0x49": {"fr": "Demande d'état FDL",                 "en": "Request FDL status"},
+             "0x4D": {"fr": "SRD haute priorité",                 "en": "SRD high priority"},
+             "0x5D": {"fr": "SRD haute priorité (FCV=1, FCB=0)",  "en": "SRD high priority (FCV=1, FCB=0)"},
+             "0x6D": {"fr": "SRD haute priorité (FCB=1)",         "en": "SRD high priority (FCB=1)"},
+             "0x7D": {"fr": "SRD haute priorité (FCV=1, FCB=1)",  "en": "SRD high priority (FCV=1, FCB=1)"},
+             "0x4E": {"fr": "Demande d'identification",           "en": "Request ident"}
+           }},
+          {"name": "FCS", "size": 1, "role": "crc", "algo": "sum8", "over": ["DA_EXT", "FC"], "color": "crc",
+           "description": "Somme sur 8 bits de DA à FC", "description_en": "8-bit sum from DA to FC"},
+          {"name": "ED", "size": 1, "role": "value", "value": "0x16", "color": "hdr"}
+        ]
+      },
+      {
+        "name": "SD2",
+        "description": "Données de longueur variable", "description_en": "Variable length data",
+        "fields": [
+          {"name": "SD2", "size": 1, "role": "value", "value": "0x68", "color": "hdr"},
+          {"name": "LE", "size": 1, "role": "length", "of": ["DA_EXT", "DA", "SA_EXT", "SA", "FC", "DATA"],
+           "description": "Longueur de DA à la fin de DATA", "description_en": "Length from DA to the end of DATA"},
+          {"name": "LEr", "size": 1, "role": "copy", "same_as": "LE",
+           "description": "Longueur répétée", "description_en": "Repeated length"},
+          {"name": "SD2 (répété)", "size": 1, "role": "value", "value": "0x68", "color": "hdr"},
+          {"name": "DA_EXT", "LENb": 1, "role": "field", "default": 0, "color": "hdr"},
+          {"name": "DA", "LENb": 7, "role": "request_id", "color": "hdr"},
+          {"name": "SA_EXT", "LENb": 1, "role": "field", "default": 0, "color": "hdr"},
+          {"name": "SA", "LENb": 7, "role": "field", "default": 2, "color": "hdr"},
+          {"name": "FC", "size": 1, "role": "command_id", "color": "cmd"},
+          {"name": "DATA", "role": "data",
+           "description": "DSAP / SSAP si extension, puis données utiles", "description_en": "DSAP / SSAP if extension, then payload"},
+          {"name": "FCS", "size": 1, "role": "crc", "algo": "sum8", "over": ["DA_EXT", "DATA"], "color": "crc"},
+          {"name": "ED", "size": 1, "role": "value", "value": "0x16", "color": "hdr"}
+        ]
+      },
+      {
+        "name": "SD3",
+        "description": "8 octets de données exactement", "description_en": "Exactly 8 data bytes",
+        "fields": [
+          {"name": "SD3", "size": 1, "role": "value", "value": "0xA2", "color": "hdr"},
+          {"name": "DA_EXT", "LENb": 1, "role": "field", "default": 0, "color": "hdr"},
+          {"name": "DA", "LENb": 7, "role": "request_id", "color": "hdr"},
+          {"name": "SA_EXT", "LENb": 1, "role": "field", "default": 0, "color": "hdr"},
+          {"name": "SA", "LENb": 7, "role": "field", "default": 2, "color": "hdr"},
+          {"name": "FC", "size": 1, "role": "command_id", "color": "cmd"},
+          {"name": "DATA", "role": "data", "description": "8 octets", "description_en": "8 bytes"},
+          {"name": "FCS", "size": 1, "role": "crc", "algo": "sum8", "over": ["DA_EXT", "DATA"], "color": "crc"},
+          {"name": "ED", "size": 1, "role": "value", "value": "0x16", "color": "hdr"}
+        ]
+      },
+      {
+        "name": "SD4",
+        "description": "Jeton (passage de parole entre maîtres)", "description_en": "Token (passed between masters)",
+        "fields": [
+          {"name": "SD4", "size": 1, "role": "value", "value": "0xDC", "color": "hdr"},
+          {"name": "DA", "size": 1, "role": "request_id", "color": "hdr",
+           "description": "Maître qui reçoit le jeton", "description_en": "Master receiving the token"},
+          {"name": "SA", "size": 1, "role": "field", "default": 2, "color": "hdr",
+           "description": "Maître qui donne le jeton", "description_en": "Master passing the token"}
+        ]
+      }
+    ]
+  },
+
+  // ------------------------------------------------------------------------------------------
+  //  RÉPONSE (esclave -> maître) : DA = maître, SA = esclave (sert de REQUEST ID)
+  //  RESPONSE (slave -> master): DA = master, SA = slave (used as REQUEST ID)
+  // ------------------------------------------------------------------------------------------
+  "rx": {
+    "variants": [
+      {
+        "name": "SC",
+        "description": "Accusé court E5", "description_en": "E5 short acknowledge",
+        "fields": [
+          {"name": "SC", "size": 1, "role": "value", "value": "0xE5", "color": "crc"}
+        ]
+      },
+      {
+        "name": "SD1",
+        "description": "Réponse sans données", "description_en": "Response without data",
+        "fields": [
+          {"name": "SD1", "size": 1, "role": "value", "value": "0x10", "color": "hdr"},
+          {"name": "DA_EXT", "LENb": 1, "role": "field", "color": "hdr"},
+          {"name": "DA", "LENb": 7, "role": "field", "color": "hdr", "description": "Maître", "description_en": "Master"},
+          {"name": "SA_EXT", "LENb": 1, "role": "field", "color": "hdr"},
+          {"name": "SA", "LENb": 7, "role": "request_id", "color": "hdr", "description": "Esclave qui répond", "description_en": "Replying slave"},
+          {"name": "FC", "size": 1, "role": "command_id", "color": "cmd",
+           "values": {
+             "0x00": {"fr": "OK / esclave prêt",                    "en": "OK / slave ready"},
+             "0x01": {"fr": "UE : erreur utilisateur",              "en": "UE: user error"},
+             "0x02": {"fr": "RR : pas de ressource",                "en": "RR: no resource"},
+             "0x03": {"fr": "RS : SAP non activé",                  "en": "RS: SAP not activated"},
+             "0x08": {"fr": "DL : données basse priorité",          "en": "DL: data low"},
+             "0x09": {"fr": "NR : pas de données de réponse",       "en": "NR: no response data"},
+             "0x0A": {"fr": "DH : données haute priorité",          "en": "DH: data high"}
+           }},
+          {"name": "FCS", "size": 1, "role": "crc", "algo": "sum8", "over": ["DA_EXT", "FC"], "color": "crc"},
+          {"name": "ED", "size": 1, "role": "value", "value": "0x16", "color": "hdr"}
+        ]
+      },
+      {
+        "name": "SD2",
+        "description": "Réponse avec données", "description_en": "Response with data",
+        "fields": [
+          {"name": "SD2", "size": 1, "role": "value", "value": "0x68", "color": "hdr"},
+          {"name": "LE", "size": 1, "role": "length", "of": ["DA_EXT", "DA", "SA_EXT", "SA", "FC", "DATA"]},
+          {"name": "LEr", "size": 1, "role": "copy", "same_as": "LE"},
+          {"name": "SD2 (répété)", "size": 1, "role": "value", "value": "0x68", "color": "hdr"},
+          {"name": "DA_EXT", "LENb": 1, "role": "field", "color": "hdr"},
+          {"name": "DA", "LENb": 7, "role": "field", "color": "hdr"},
+          {"name": "SA_EXT", "LENb": 1, "role": "field", "color": "hdr"},
+          {"name": "SA", "LENb": 7, "role": "request_id", "color": "hdr"},
+          {"name": "FC", "size": 1, "role": "command_id", "color": "cmd"},
+          {"name": "DATA", "role": "data"},
+          {"name": "FCS", "size": 1, "role": "crc", "algo": "sum8", "over": ["DA_EXT", "DATA"], "color": "crc"},
+          {"name": "ED", "size": 1, "role": "value", "value": "0x16", "color": "hdr"}
+        ]
+      }
+    ]
+  },
+
+  "errors": {},
+
+  "commands": "../msgLibrary/msgList/profibus"
+}

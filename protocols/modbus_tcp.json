@@ -1,0 +1,97 @@
+// =============================================================================================
+//  Modbus TCP  —  protocole public / public protocol
+// ---------------------------------------------------------------------------------------------
+//  FR : En-tête MBAP (7 octets) + PDU Modbus (FONCTION + DONNÉES), sans CRC (TCP s'en charge).
+//       Liaison : choisir « TCP » dans la partie Connexion, port 502 par défaut.
+//       Aussi utilisable sur une liaison série vers une passerelle qui attend du MBAP.
+//  EN : MBAP header (7 bytes) + Modbus PDU (FUNCTION + DATA), no CRC (TCP handles it).
+//       Link: choose "TCP" in the Connection area, port 502 by default.
+//       Can also be used on a serial link to a gateway expecting MBAP frames.
+//
+//  Exemple / example :
+//    TX 00 01 00 00 00 06 01 03 00 00 00 0A      transaction 1, longueur 6, unité 1, lecture 10 registres
+//    RX 00 01 00 00 00 03 01 83 02               exception 2 : adresse invalide / illegal data address
+//
+//  Toutes les options : LISEZMOI_CONF.txt  /  All options: README_CONF.txt
+// =============================================================================================
+{
+  "name": "Modbus TCP",
+  "description": "Modbus TCP : en-tête MBAP (transaction, protocole 0, longueur, unité) + PDU",
+  "description_en": "Modbus TCP: MBAP header (transaction, protocol 0, length, unit) + PDU",
+  "byte_order": "big",
+  "bit_order": "msb",
+  "encoding": "binary",
+
+  "categories": {
+    "READ":  {"fr": "Lecture",    "en": "Read"},
+    "WRITE": {"fr": "Écriture",   "en": "Write"},
+    "DIAG":  {"fr": "Diagnostic", "en": "Diagnostics"}
+  },
+
+  "tx": [
+    // Numéro de transaction : recopié dans la réponse ; « +1 après envoi » l'incrémente.
+    // Transaction id: echoed in the response; "+1 after send" increments it.
+    {"name": "TRANSACTION", "size": 2, "role": "request_id", "color": "hdr",
+     "description": "Identifiant de transaction, recopié par le serveur", "description_en": "Transaction identifier, echoed by the server"},
+    {"name": "PROTOCOLE", "size": 2, "role": "value", "value": "0x0000", "color": "hdr",
+     "description": "Toujours 0 pour Modbus", "description_en": "Always 0 for Modbus"},
+    // Longueur calculée : nombre d'octets de UNITÉ + FONCTION + DATA.
+    // Computed length: number of bytes of UNIT + FUNCTION + DATA.
+    {"name": "LONGUEUR", "size": 2, "role": "length", "of": ["UNITÉ", "FONCTION", "DATA"],
+     "description": "Octets qui suivent (unité + PDU)", "description_en": "Following bytes (unit + PDU)"},
+    // field : champ numérique libre, valeur par défaut "default".
+    // field: free numeric field, default value "default".
+    {"name": "UNITÉ", "size": 1, "role": "field", "default": 1, "color": "hdr",
+     "description": "Adresse de l'esclave derrière une passerelle (0xFF si sans objet)",
+     "description_en": "Server address behind a gateway (0xFF if not applicable)",
+     "values": {"0xFF": {"fr": "sans objet", "en": "not applicable"}}},
+    {"name": "FONCTION", "size": 1, "role": "command_id", "color": "cmd",
+     "description": "Code fonction Modbus (voir modbus_rtu.json)", "description_en": "Modbus function code (see modbus_rtu.json)"},
+    {"name": "DATA", "role": "data"}
+  ],
+
+  "rx": {
+    "variants": [
+      {
+        "name": "Normale",
+        "description": "Réponse normale", "description_en": "Normal response",
+        "fields": [
+          {"name": "TRANSACTION", "size": 2, "role": "request_id", "color": "hdr"},
+          {"name": "PROTOCOLE", "size": 2, "role": "value", "value": "0x0000", "color": "hdr"},
+          // Le bit EXCEPTION et les 7 bits de FONCTION forment un octet : comptés ensemble.
+          // The EXCEPTION bit and the 7 FUNCTION bits make one byte: counted together.
+          {"name": "LONGUEUR", "size": 2, "role": "length", "of": ["UNITÉ", "EXCEPTION", "FONCTION", "DATA"]},
+          {"name": "UNITÉ", "size": 1, "role": "field", "color": "hdr"},
+          {"name": "EXCEPTION", "LENb": 1, "role": "value", "value": 0, "color": "hdr"},
+          {"name": "FONCTION", "LENb": 7, "role": "command_id", "color": "cmd"},
+          {"name": "DATA", "role": "data"}
+        ]
+      },
+      {
+        "name": "Exception",
+        "description": "Fonction + 0x80, puis code d'exception", "description_en": "Function + 0x80, then exception code",
+        "fields": [
+          {"name": "TRANSACTION", "size": 2, "role": "request_id", "color": "hdr"},
+          {"name": "PROTOCOLE", "size": 2, "role": "value", "value": "0x0000", "color": "hdr"},
+          {"name": "LONGUEUR", "size": 2, "role": "length", "of": ["UNITÉ", "EXCEPTION", "FONCTION", "CODE EXCEPTION"]},
+          {"name": "UNITÉ", "size": 1, "role": "field", "color": "hdr"},
+          {"name": "EXCEPTION", "LENb": 1, "role": "value", "value": 1, "color": "hdr"},
+          {"name": "FONCTION", "LENb": 7, "role": "command_id", "color": "cmd"},
+          {"name": "CODE EXCEPTION", "size": 1, "role": "error"}
+        ]
+      }
+    ]
+  },
+
+  "errors": {
+    "0x01": {"fr": "Fonction non supportée",                "en": "Illegal function"},
+    "0x02": {"fr": "Adresse de données invalide",           "en": "Illegal data address"},
+    "0x03": {"fr": "Valeur de données invalide",            "en": "Illegal data value"},
+    "0x04": {"fr": "Défaut de l'esclave",                   "en": "Server device failure"},
+    "0x06": {"fr": "Esclave occupé",                        "en": "Server device busy"},
+    "0x0A": {"fr": "Passerelle : chemin indisponible",      "en": "Gateway path unavailable"},
+    "0x0B": {"fr": "Passerelle : l'appareil ne répond pas", "en": "Gateway target device failed to respond"}
+  },
+
+  "commands": "../msgLibrary/msgList/modbus"
+}

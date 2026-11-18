@@ -1,0 +1,126 @@
+// =============================================================================================
+//  Commandes d'un compteur M-Bus FICTIF : « compteur d'énergie thermique exemple ».
+//  Commands of a FICTITIOUS M-Bus meter: "example heat meter".
+// ---------------------------------------------------------------------------------------------
+//  Utilisé par mbus.json. Adresse primaire de l'exemple : 5 (champ A, saisi comme REQUEST ID).
+//  Used by mbus.json. Primary address of the example: 5 (field A, entered as REQUEST ID).
+//
+//  "variant" : format de trame de la requête (Courte / Longue), choisi automatiquement.
+//  "header"  : valeur des champs d'en-tête propres à la commande (ici CI). Plusieurs commandes
+//              ont le même C = 0x53 : "header" les distingue.
+//  "variant": request frame format (Courte = short / Longue = long), selected automatically.
+//  "header":  values of the header fields specific to the command (here CI). Several commands
+//             share C = 0x53: "header" tells them apart.
+//
+//  Réponse RSP_UD (CI = 0x72) de l'exemple, 32 octets de DATA / example RSP_UD reply, 32 DATA bytes :
+//    68 23 23 68 08 05 72 78 56 34 12 01 17 01 04 2A 00 00 00 04 06 39 30 00 00
+//    0C 13 89 67 45 00 02 5A E8 03 02 5E 52 03 9D 16
+//    78 56 34 12   n° d'identification 12345678 (BCD, poids faible en premier)
+//    01 17         fabricant « EXA » / manufacturer "EXA"
+//    01 04 2A 00   version 1, chaleur / heat, accès / access 42, statut / status 0
+//    00 00         signature
+//    04 06 39 30 00 00     énergie / energy        12345 kWh   (DIF 04 = 32 bits, VIF 06 = kWh)
+//    0C 13 89 67 45 00     volume                 456.789 m³  (DIF 0C = BCD 8 chiffres, VIF 13 = 0,001 m³)
+//    02 5A E8 03           départ / flow           100.0 °C    (DIF 02 = 16 bits, VIF 5A = 0,1 °C)
+//    02 5E 52 03           retour / return          85.0 °C    (VIF 5E = 0,1 °C)
+// =============================================================================================
+{
+  "protocol": "M-Bus",
+  "group": "READ",
+  "commands": [
+    {
+      "name": "Initialisation (SND_NKE)",
+      "name_en": "Initialisation (SND_NKE)",
+      "id": "0x40",
+      "group": "INIT",
+      "variant": "Courte",
+      "description": "Remet le compteur en état de communication. Réponse : E5. Trame : 10 40 05 45 16",
+      "description_en": "Resets the meter communication state. Reply: E5. Frame: 10 40 05 45 16",
+      "tx": [],
+      "rx": []
+    },
+    {
+      "name": "Lire les données (REQ_UD2)",
+      "name_en": "Read data (REQ_UD2)",
+      "id": "0x5B",
+      "group": "READ",
+      "variant": "Courte",
+      "description": "Demande les valeurs du compteur. Réponse RSP_UD (trame longue, CI 0x72)",
+      "description_en": "Requests the meter values. Reply RSP_UD (long frame, CI 0x72)",
+      "tx": [],
+      "rx": [
+        // --- En-tête des données variables / variable data header (12 octets / bytes)
+        {"name": "ident", "label": "N° d'identification", "label_en": "Identification number", "type": "bcd", "length": 4},
+        {"name": "manufacturer", "label": "Fabricant", "label_en": "Manufacturer", "type": "uint16", "choices": {"EXA (exemple)": "0x1701"}},
+        {"name": "version", "label": "Version", "label_en": "Version", "type": "uint8"},
+        {"name": "medium", "label": "Fluide", "label_en": "Medium", "type": "uint8",
+         "choices": {"électricité / electricity": 2, "gaz / gas": 3, "chaleur / heat": 4, "eau / water": 7}},
+        {"name": "access", "label": "N° d'accès", "label_en": "Access number", "type": "uint8"},
+        {"name": "status", "label": "Statut", "label_en": "Status", "type": "uint8",
+         "bits": {"0": "application occupée / busy", "1": "erreur application / application error",
+                  "2": "alimentation faible / power low", "3": "erreur permanente / permanent error",
+                  "4": "erreur temporaire / temporary error"}},
+        {"name": "signature", "label": "Signature", "label_en": "Signature", "type": "uint16"},
+        // --- Enregistrements DIF / VIF / valeur  -  DIF / VIF / value records
+        {"name": "energy DIF", "label": "DIF énergie", "label_en": "Energy DIF", "type": "raw", "count": 1},
+        {"name": "energy VIF", "label": "VIF énergie", "label_en": "Energy VIF", "type": "raw", "count": 1},
+        {"name": "energy", "label": "Énergie", "label_en": "Energy", "type": "uint32", "unit": "kWh"},
+        {"name": "volume DIF", "label": "DIF volume", "label_en": "Volume DIF", "type": "raw", "count": 1},
+        {"name": "volume VIF", "label": "VIF volume", "label_en": "Volume VIF", "type": "raw", "count": 1},
+        {"name": "volume", "label": "Volume", "label_en": "Volume", "type": "bcd", "length": 4, "factor": 0.001, "unit": "m³"},
+        {"name": "flow DIF", "label": "DIF départ", "label_en": "Flow DIF", "type": "raw", "count": 1},
+        {"name": "flow VIF", "label": "VIF départ", "label_en": "Flow VIF", "type": "raw", "count": 1},
+        {"name": "flow", "label": "Température départ", "label_en": "Flow temperature", "type": "int16", "factor": 0.1, "unit": "°C"},
+        {"name": "return DIF", "label": "DIF retour", "label_en": "Return DIF", "type": "raw", "count": 1},
+        {"name": "return VIF", "label": "VIF retour", "label_en": "Return VIF", "type": "raw", "count": 1},
+        {"name": "return", "label": "Température retour", "label_en": "Return temperature", "type": "int16", "factor": 0.1, "unit": "°C"}
+      ]
+    },
+    {
+      "name": "Remise à zéro de l'application",
+      "name_en": "Application reset",
+      "id": "0x53",
+      "group": "INIT",
+      "variant": "Longue",
+      "header": {"CI": "0x50"},
+      "description": "SND_UD, CI 0x50. Réponse : E5. Trame : 68 03 03 68 53 05 50 A8 16",
+      "description_en": "SND_UD, CI 0x50. Reply: E5. Frame: 68 03 03 68 53 05 50 A8 16",
+      "tx": [],
+      "rx": []
+    },
+    {
+      "name": "Sélection par adresse secondaire",
+      "name_en": "Select by secondary address",
+      "id": "0x53",
+      "group": "INIT",
+      "variant": "Longue",
+      "header": {"CI": "0x52"},
+      "description": "À envoyer à l'adresse 0xFD. F = joker (FF FF pour le fabricant, FF pour version et fluide)",
+      "description_en": "Send to address 0xFD. F = wildcard (FF FF for manufacturer, FF for version and medium)",
+      "tx": [
+        {"name": "ident", "label": "N° d'identification", "label_en": "Identification number", "type": "bcd", "length": 4, "default": 12345678},
+        {"name": "manufacturer", "label": "Fabricant", "label_en": "Manufacturer", "type": "uint16", "default": "0xFFFF"},
+        {"name": "version", "label": "Version", "label_en": "Version", "type": "uint8", "default": "0xFF"},
+        {"name": "medium", "label": "Fluide", "label_en": "Medium", "type": "uint8", "default": "0xFF"}
+      ],
+      "rx": []
+    },
+    {
+      "name": "Changer l'adresse primaire",
+      "name_en": "Change primary address",
+      "id": "0x53",
+      "group": "SET",
+      "variant": "Longue",
+      "header": {"CI": "0x51"},
+      "description": "SND_UD, CI 0x51, enregistrement DIF 01 / VIF 7A + nouvelle adresse. Réponse : E5",
+      "description_en": "SND_UD, CI 0x51, record DIF 01 / VIF 7A + new address. Reply: E5",
+      "attributes": {"access": "W", "level": "expert"},
+      "tx": [
+        {"name": "dif", "label": "DIF", "label_en": "DIF", "type": "raw", "count": 1, "default": "01"},
+        {"name": "vif", "label": "VIF (adresse)", "label_en": "VIF (address)", "type": "raw", "count": 1, "default": "7A"},
+        {"name": "address", "label": "Nouvelle adresse", "label_en": "New address", "type": "uint8", "min": 1, "max": 250, "default": 6}
+      ],
+      "rx": []
+    }
+  ]
+}

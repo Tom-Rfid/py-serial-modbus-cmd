@@ -1,0 +1,25 @@
+// Version Techmelec : base open source, générique (voir core/edition.py)
+{
+  "name": "Techmelec",
+  "title": "SerialHex",
+  "default_protocol": "modbus_rtu.json",
+  "icon": "assets/icon.png",
+  "url": "",
+  // Liste des ports série du panneau Liaison
+  "ports": {
+    "hide_bluetooth": true,       // ports série sur Bluetooth jamais affichés
+    "filter_label": "FTDI",       // texte de la case de filtre
+    "filter_default": false,      // case décochée au premier lancement (mémorisée ensuite)
+    // Adaptateurs gardés quand la case est cochée : "enabled": false pour en retirer un
+    // sans effacer la ligne ; ajouter une ligne pour un autre adaptateur (VID / PID en hexa)
+    "filter": [
+      {"name": "FT232R / FT245R",        "vid": "0x0403", "pid": "0x6001", "enabled": true},
+      {"name": "FT2232",                 "vid": "0x0403", "pid": "0x6010", "enabled": true},
+      {"name": "FT4232",                 "vid": "0x0403", "pid": "0x6011", "enabled": true},
+      {"name": "FT232H",                 "vid": "0x0403", "pid": "0x6014", "enabled": true},
+      {"name": "FT-X (FT230X, FT231X…)", "vid": "0x0403", "pid": "0x6015", "enabled": true},
+      {"name": "CH340",                  "vid": "0x1A86", "pid": "0x7523", "enabled": false},
+      {"name": "CP2102",                 "vid": "0x10C4", "pid": "0xEA60", "enabled": false}
+    ]
+  }
+}

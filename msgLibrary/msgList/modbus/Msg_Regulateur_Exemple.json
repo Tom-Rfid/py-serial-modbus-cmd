@@ -1,0 +1,204 @@
+// =============================================================================================
+//  Commandes d'un appareil Modbus FICTIF : « régulateur de température exemple », esclave 1.
+//  Commands of a FICTITIOUS Modbus device: "example temperature controller", server 1.
+// ---------------------------------------------------------------------------------------------
+//  Utilisé par modbus_rtu.json, modbus_ascii.json et modbus_tcp.json (même PDU Modbus).
+//  Used by modbus_rtu.json, modbus_ascii.json and modbus_tcp.json (same Modbus PDU).
+//
+//  Table des registres / register map :
+//    Registres de maintien / holding registers (fonctions 03, 06, 16)
+//      0x0000  consigne / setpoint           int16  × 0.1 °C   lecture-écriture / read-write
+//      0x0001  mode                          uint16 0 arrêt/off, 1 auto, 2 manuel/manual
+//      0x0002  puissance de sortie / output  uint16 × 0.1 %    lecture seule / read only
+//    Registres d'entrée / input registers (fonction 04)
+//      0x0000  température mesurée / measured temperature   int16  × 0.1 °C
+//      0x0001  humidité / humidity                          uint16 × 0.1 %HR
+//    Bobine / coil (fonctions 01, 05)
+//      0x000A  relais d'alarme / alarm relay
+//
+//  Fonctions génériques (tout registre, diagnostic, identification) : Msg_Modbus_Standard.json.
+//  Ici, chaque commande vise un registre précis ("match") : elle passe avant la générique.
+//  Generic functions (any register, diagnostics, identification): Msg_Modbus_Standard.json.
+//  Here each command targets one register ("match"): it wins over the generic one.
+//
+//  Plusieurs commandes ont la même fonction (même COMMAND ID) : "match" donne la valeur des
+//  champs qui les distinguent (ici le registre). La réponse est décodée avec la commande de
+//  la dernière requête envoyée à cet esclave (même ADRESSE).
+//  Several commands share a function code (same COMMAND ID): "match" gives the value of the
+//  fields that tell them apart (here the register). The reply is decoded with the command of
+//  the last request sent to that server (same ADDRESS).
+//
+//  Clés d'un champ : LISEZMOI_CONF.txt, partie « Fichiers de commandes ».
+// =============================================================================================
+{
+  // Protocole(s) pour lesquels ce fichier est écrit / protocol(s) this file is written for
+  "protocol": ["Modbus RTU", "Modbus ASCII", "Modbus TCP"],
+  "group": "READ",
+  "commands": [
+
+    // --- Fonction 03 : lecture de registres de maintien / read holding registers ----------
+    {
+      "name": "Lire consigne et mode",
+      "name_en": "Read setpoint and mode",
+      "id": "0x03",
+      "group": "READ",
+      "description": "Registres 0x0000 et 0x0001. Trame : 01 03 00 00 00 02 C4 0B",
+      "description_en": "Registers 0x0000 and 0x0001. Frame: 01 03 00 00 00 02 C4 0B",
+      "attributes": {"access": "R"},                 // champ libre affiché avec la description
+      "match": {"register": "0x0000"},               // distingue des autres commandes 03 / tells apart other 03 commands
+      "tx": [
+        {"name": "register", "label": "Registre", "label_en": "Register", "type": "uint16", "default": "0x0000", "min": 0, "max": 0},
+        {"name": "quantity", "label": "Nombre", "label_en": "Quantity", "type": "uint16", "default": 2, "min": 2, "max": 2}
+      ],
+      "rx": [
+        {"name": "bytes", "label": "Nombre d'octets", "label_en": "Byte count", "type": "uint8"},
+        {"name": "setpoint", "label": "Consigne", "label_en": "Setpoint", "type": "int16", "factor": 0.1, "unit": "°C", "min": -50, "max": 150},
+        {"name": "mode", "label": "Mode", "label_en": "Mode", "type": "uint16", "choices": {"arrêt": 0, "auto": 1, "manuel": 2}}
+      ]
+    },
+    {
+      "name": "Lire puissance de sortie",
+      "name_en": "Read output power",
+      "id": "0x03",
+      "group": "READ",
+      "description": "Registre 0x0002 (lecture seule)",
+      "description_en": "Register 0x0002 (read only)",
+      "attributes": {"access": "R"},
+      "match": {"register": "0x0002"},
+      "tx": [
+        {"name": "register", "label": "Registre", "label_en": "Register", "type": "uint16", "default": "0x0002", "min": 2, "max": 2},
+        {"name": "quantity", "label": "Nombre", "label_en": "Quantity", "type": "uint16", "default": 1, "min": 1, "max": 1}
+      ],
+      "rx": [
+        {"name": "bytes", "label": "Nombre d'octets", "label_en": "Byte count", "type": "uint8"},
+        {"name": "power", "label": "Puissance", "label_en": "Power", "type": "uint16", "factor": 0.1, "unit": "%", "max": 100}
+      ]
+    },
+
+    // --- Fonction 04 : registres d'entrée / input registers ---------------------------------
+    {
+      "name": "Lire mesures",
+      "name_en": "Read measurements",
+      "id": "0x04",
+      "group": "READ",
+      "description": "Température et humidité. Trame : 01 04 00 00 00 02 71 CB",
+      "description_en": "Temperature and humidity. Frame: 01 04 00 00 00 02 71 CB",
+      "attributes": {"access": "R"},
+      "match": {"register": "0x0000"},
+      "tx": [
+        {"name": "register", "label": "Registre", "label_en": "Register", "type": "uint16", "default": "0x0000"},
+        {"name": "quantity", "label": "Nombre", "label_en": "Quantity", "type": "uint16", "default": 2, "min": 1, "max": 2}
+      ],
+      "rx": [
+        {"name": "bytes", "label": "Nombre d'octets", "label_en": "Byte count", "type": "uint8"},
+        {"name": "temperature", "label": "Température", "label_en": "Temperature", "type": "int16", "factor": 0.1, "unit": "°C"},
+        {"name": "humidity", "label": "Humidité", "label_en": "Humidity", "type": "uint16", "factor": 0.1, "unit": "%HR", "max": 100}
+      ]
+    },
+
+    // --- Fonction 06 : écriture d'un registre / write single register -----------------------
+    {
+      "name": "Écrire consigne",
+      "name_en": "Write setpoint",
+      "id": "0x06",
+      "group": "WRITE",
+      "description": "Registre 0x0000. 23.0 °C -> 01 06 00 00 00 E6 08 40 ; la réponse est l'écho de la requête",
+      "description_en": "Register 0x0000. 23.0 °C -> 01 06 00 00 00 E6 08 40; the reply echoes the request",
+      "attributes": {"access": "W"},
+      "match": {"register": "0x0000"},
+      "tx": [
+        {"name": "register", "label": "Registre", "label_en": "Register", "type": "uint16", "default": "0x0000", "min": 0, "max": 0},
+        {"name": "setpoint", "label": "Consigne", "label_en": "Setpoint", "type": "int16", "factor": 0.1, "unit": "°C", "min": -50, "max": 150, "default": 23}
+      ],
+      "rx": [
+        {"name": "register", "label": "Registre", "label_en": "Register", "type": "uint16"},
+        {"name": "setpoint", "label": "Consigne", "label_en": "Setpoint", "type": "int16", "factor": 0.1, "unit": "°C"}
+      ],
+      "presets": [
+        {"name": "20 °C", "values": {"setpoint": 20}},
+        {"name": "37.5 °C", "values": {"setpoint": 37.5}}
+      ]
+    },
+    {
+      "name": "Écrire mode",
+      "name_en": "Write mode",
+      "id": "0x06",
+      "group": "WRITE",
+      "description": "Registre 0x0001 : arrêt, auto ou manuel",
+      "description_en": "Register 0x0001: off, auto or manual",
+      "attributes": {"access": "W"},
+      "match": {"register": "0x0001"},
+      "tx": [
+        {"name": "register", "label": "Registre", "label_en": "Register", "type": "uint16", "default": "0x0001", "min": 1, "max": 1},
+        {"name": "mode", "label": "Mode", "label_en": "Mode", "type": "uint16", "choices": {"arrêt": 0, "auto": 1, "manuel": 2}, "default": "auto"}
+      ],
+      "rx": [
+        {"name": "register", "label": "Registre", "label_en": "Register", "type": "uint16"},
+        {"name": "mode", "label": "Mode", "label_en": "Mode", "type": "uint16", "choices": {"arrêt": 0, "auto": 1, "manuel": 2}}
+      ]
+    },
+
+    // --- Fonction 16 (0x10) : écriture de plusieurs registres / write multiple registers ----
+    {
+      "name": "Écrire consigne et mode",
+      "name_en": "Write setpoint and mode",
+      "id": "0x10",
+      "group": "WRITE",
+      "description": "Registres 0x0000 et 0x0001 en une trame",
+      "description_en": "Registers 0x0000 and 0x0001 in one frame",
+      "attributes": {"access": "W"},
+      "match": {"register": "0x0000"},
+      "tx": [
+        {"name": "register", "label": "Registre", "label_en": "Register", "type": "uint16", "default": "0x0000", "min": 0, "max": 0},
+        {"name": "quantity", "label": "Nombre", "label_en": "Quantity", "type": "uint16", "default": 2, "min": 2, "max": 2},
+        {"name": "bytes", "label": "Nombre d'octets", "label_en": "Byte count", "type": "uint8", "default": 4, "min": 4, "max": 4},
+        {"name": "setpoint", "label": "Consigne", "label_en": "Setpoint", "type": "int16", "factor": 0.1, "unit": "°C", "min": -50, "max": 150, "default": 23},
+        {"name": "mode", "label": "Mode", "label_en": "Mode", "type": "uint16", "choices": {"arrêt": 0, "auto": 1, "manuel": 2}, "default": "auto"}
+      ],
+      "rx": [
+        {"name": "register", "label": "Registre", "label_en": "Register", "type": "uint16"},
+        {"name": "quantity", "label": "Nombre", "label_en": "Quantity", "type": "uint16"}
+      ]
+    },
+
+    // --- Fonctions 01 / 05 : bobine / coil -------------------------------------------------
+    {
+      "name": "Lire relais d'alarme",
+      "name_en": "Read alarm relay",
+      "id": "0x01",
+      "group": "READ",
+      "description": "Bobine 0x000A",
+      "description_en": "Coil 0x000A",
+      "match": {"coil": "0x000A"},
+      "tx": [
+        {"name": "coil", "label": "Bobine", "label_en": "Coil", "type": "uint16", "default": "0x000A"},
+        {"name": "quantity", "label": "Nombre", "label_en": "Quantity", "type": "uint16", "default": 1, "min": 1, "max": 1}
+      ],
+      "rx": [
+        {"name": "bytes", "label": "Nombre d'octets", "label_en": "Byte count", "type": "uint8"},
+        {"name": "relay", "label": "Relais", "label_en": "Relay", "type": "uint8", "bits": {"0": "relais d'alarme actif / alarm relay on"}}
+      ]
+    },
+    {
+      "name": "Commander relais d'alarme",
+      "name_en": "Switch alarm relay",
+      "id": "0x05",
+      "group": "WRITE",
+      "description": "Bobine 0x000A : FF00 = marche, 0000 = arrêt. Marche -> 01 05 00 0A FF 00 AC 38",
+      "description_en": "Coil 0x000A: FF00 = on, 0000 = off. On -> 01 05 00 0A FF 00 AC 38",
+      "match": {"coil": "0x000A"},
+      "tx": [
+        {"name": "coil", "label": "Bobine", "label_en": "Coil", "type": "uint16", "default": "0x000A"},
+        {"name": "state", "label": "État", "label_en": "State", "type": "uint16", "choices": {"marche": "0xFF00", "arrêt": "0x0000"}, "default": "marche"}
+      ],
+      "rx": [
+        {"name": "coil", "label": "Bobine", "label_en": "Coil", "type": "uint16"},
+        {"name": "state", "label": "État", "label_en": "State", "type": "uint16", "choices": {"marche": "0xFF00", "arrêt": "0x0000"}}
+      ],
+      "presets": [
+        {"name": "Marche / On", "values": {"state": "marche"}},
+        {"name": "Arrêt / Off", "values": {"state": "arrêt"}}
+      ]
+    }
+  ]
+}

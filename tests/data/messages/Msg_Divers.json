@@ -1,0 +1,32 @@
+{
+  "group": "Divers",
+  "messages": [
+    {
+      "name": "Texte STX/ETX",
+      "frame": [
+        "02",
+        "{texte}",
+        "03"
+      ],
+      "params": {
+        "texte": {
+          "type": "ascii",
+          "default": "HELLO"
+        }
+      }
+    },
+    {
+      "name": "Trame brute",
+      "frame": [
+        "{data}"
+      ],
+      "params": {
+        "data": {
+          "type": "hex",
+          "label": "Octets",
+          "default": "DE AD BE EF"
+        }
+      }
+    }
+  ]
+}

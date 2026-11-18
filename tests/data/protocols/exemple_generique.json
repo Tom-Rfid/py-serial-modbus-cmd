@@ -1,0 +1,67 @@
+// =============================================================================================
+//  Exemple générique  —  modèle à copier pour décrire un autre appareil
+//  Generic example   —  template to copy to describe another device
+// ---------------------------------------------------------------------------------------------
+//  FR : C'est aussi le protocole intégré à SerialHex (repli si aucun fichier n'est utilisable).
+//       Requête : SYNC A5 5A | SEQ | CMD (2 octets) | LEN | HCRC | DATA | DCRC (2 octets, si DATA)
+//       Réponse : SYNC A5 5A | SEQ | STATUS          | LEN | HCRC | DATA | DCRC (2 octets, si DATA)
+//       HCRC = CRC8 de l'en-tête (SYNC à LEN), DCRC = CRC16 CCITT de DATA seule.
+//  EN : This is also SerialHex's built-in protocol (fallback when no file is usable).
+//       Request:  SYNC A5 5A | SEQ | CMD (2 bytes) | LEN | HCRC | DATA | DCRC (2 bytes, if DATA)
+//       Response: SYNC A5 5A | SEQ | STATUS        | LEN | HCRC | DATA | DCRC (2 bytes, if DATA)
+//       HCRC = CRC8 of the header (SYNC to LEN), DCRC = CRC16 CCITT of DATA only.
+//
+//  Exemples / examples :
+//    TX A5 5A 05 00 10 00 64              SEQ 5, CMD 0x0010, sans données / no data
+//    RX A5 5A 05 00 01 B9 01 F1 D1        SEQ 5, STATUS 0, DATA 01
+//
+//  Toutes les options : LISEZMOI_CONF.txt  /  All options: README_CONF.txt
+// =============================================================================================
+{
+  "name": "Exemple générique",
+  "description": "SYNC A5 5A, SEQ, CMD 16 bits, LEN, CRC8 d'en-tête, DATA, CRC16 CCITT des données, big endian",
+  "description_en": "SYNC A5 5A, SEQ, 16-bit CMD, LEN, header CRC8, DATA, data CRC16 CCITT, big endian",
+  "byte_order": "big",                       // poids fort en premier / most significant byte first
+
+  // ------------------------------------------------------------------------------------------
+  //  REQUÊTE  /  REQUEST
+  // ------------------------------------------------------------------------------------------
+  "tx": [
+    {"name": "SYNC", "size": 2, "role": "value", "value": "0xA55A", "color": "hdr",
+     "description": "Octets de synchronisation, toujours A5 5A", "description_en": "Sync bytes, always A5 5A"},
+    {"name": "SEQ", "size": 1, "role": "request_id", "color": "hdr",
+     "description": "Numéro de requête, recopié dans la réponse", "description_en": "Request number, echoed in the response"},
+    {"name": "CMD", "size": 2, "role": "command_id", "color": "cmd",
+     "description": "Code de la commande", "description_en": "Command code"},
+    {"name": "LEN", "size": 1, "role": "length", "of": "DATA",
+     "description": "Nombre d'octets de DATA", "description_en": "Number of DATA bytes"},
+    {"name": "HCRC", "size": 1, "role": "crc", "algo": "crc8", "over": ["SYNC", "LEN"], "color": "crc",
+     "description": "CRC8 de l'en-tête", "description_en": "Header CRC8"},
+    {"name": "DATA", "role": "data"},
+    {"name": "DCRC", "size": 2, "role": "crc", "algo": "crc16_ccitt_false", "over": ["DATA", "DATA"], "if": "DATA",
+     "color": "crc", "description": "CRC16 CCITT des données, absent sans données",
+     "description_en": "Data CRC16 CCITT, absent without data"}
+  ],
+
+  // ------------------------------------------------------------------------------------------
+  //  RÉPONSE  /  RESPONSE
+  // ------------------------------------------------------------------------------------------
+  "rx": [
+    {"name": "SYNC", "size": 2, "role": "value", "value": "0xA55A", "color": "hdr"},
+    {"name": "SEQ", "size": 1, "role": "request_id", "color": "hdr"},
+    {"name": "STATUS", "size": 1, "role": "error",
+     "description": "Code d'erreur, 0 = OK", "description_en": "Error code, 0 = OK"},
+    {"name": "LEN", "size": 1, "role": "length", "of": "DATA"},
+    {"name": "HCRC", "size": 1, "role": "crc", "algo": "crc8", "over": ["SYNC", "LEN"], "color": "crc"},
+    {"name": "DATA", "role": "data"},
+    {"name": "DCRC", "size": 2, "role": "crc", "algo": "crc16_ccitt_false", "over": ["DATA", "DATA"], "if": "DATA",
+     "color": "crc"}
+  ],
+
+  "errors": {
+    "0": {"fr": "OK",                 "en": "OK"},
+    "1": {"fr": "Commande inconnue",  "en": "Unknown command"},
+    "2": {"fr": "Paramètre invalide", "en": "Invalid parameter"},
+    "3": {"fr": "CRC invalide",       "en": "Invalid CRC"}
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "group": "Sorties",
+  "messages": [
+    {
+      "name": "Régler LED",
+      "description": "Exemple avec entier, liste de choix et valeur 16 bits big endian.",
+      "frame": [
+        "AA 55",
+        "10",
+        "{led}",
+        "{mode}",
+        "{luminosite}",
+        "{cs}"
+      ],
+      "params": {
+        "led": {
+          "type": "u8",
+          "label": "N° LED",
+          "default": 1,
+          "min": 1,
+          "max": 8
+        },
+        "mode": {
+          "type": "enum",
+          "size": "u8",
+          "choices": {
+            "off": 0,
+            "on": 1,
+            "clignote": 2
+          },
+          "default": "on"
+        },
+        "luminosite": {
+          "type": "u16be",
+          "label": "Luminosité",
+          "default": 512,
+          "min": 0,
+          "max": 1023,
+          "unit": "/1023"
+        }
+      },
+      "checksum": {
+        "algo": "xor8",
+        "start": 2
+      }
+    },
+    {
+      "name": "Activer relais",
+      "frame": [
+        "AA 55",
+        "11",
+        "{relais}",
+        "{etat}",
+        "{cs}"
+      ],
+      "params": {
+        "relais": {
+          "type": "u8",
+          "default": 0,
+          "min": 0,
+          "max": 3
+        },
+        "etat": {
+          "type": "bool",
+          "label": "Activé",
+          "default": true
+        }
+      },
+      "checksum": {
+        "algo": "sum8",
+        "start": 2
+      }
+    }
+  ]
+}

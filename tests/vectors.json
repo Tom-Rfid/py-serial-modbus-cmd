@@ -1,0 +1,1581 @@
+{
+  "cases": [
+    {
+      "name": "messages/Divers/Texte STX/ETX",
+      "message": {
+        "name": "Texte STX/ETX",
+        "frame": [
+          "02",
+          "{texte}",
+          "03"
+        ],
+        "params": {
+          "texte": {
+            "type": "ascii",
+            "default": "HELLO"
+          }
+        },
+        "group": "Divers",
+        "_file": "Msg_Divers.json",
+        "_path": "/home/claude/build/techmelec/SerialHex_Techmelec/tests/data/messages/Msg_Divers.json"
+      },
+      "values": {},
+      "frame": "02 48 45 4C 4C 4F 03"
+    },
+    {
+      "name": "messages/Divers/Trame brute",
+      "message": {
+        "name": "Trame brute",
+        "frame": [
+          "{data}"
+        ],
+        "params": {
+          "data": {
+            "type": "hex",
+            "label": "Octets",
+            "default": "DE AD BE EF"
+          }
+        },
+        "group": "Divers",
+        "_file": "Msg_Divers.json",
+        "_path": "/home/claude/build/techmelec/SerialHex_Techmelec/tests/data/messages/Msg_Divers.json"
+      },
+      "values": {},
+      "frame": "DE AD BE EF"
+    },
+    {
+      "name": "messages/Modbus/Modbus - écrire registre",
+      "message": {
+        "name": "Modbus - écrire registre",
+        "description": "Fonction 06, CRC16 Modbus ajouté automatiquement (little endian).",
+        "frame": [
+          "{esclave}",
+          "06",
+          "{registre}",
+          "{valeur}",
+          "{cs}"
+        ],
+        "params": {
+          "esclave": {
+            "type": "u8",
+            "label": "Adresse esclave",
+            "default": 1,
+            "min": 1,
+            "max": 247
+          },
+          "registre": {
+            "type": "u16be",
+            "default": "0x0010"
+          },
+          "valeur": {
+            "type": "u16be",
+            "default": 0
+          }
+        },
+        "checksum": {
+          "algo": "crc16_modbus",
+          "start": 0
+        },
+        "group": "Modbus",
+        "_file": "Msg_Modbus.json",
+        "_path": "/home/claude/build/techmelec/SerialHex_Techmelec/tests/data/messages/Msg_Modbus.json"
+      },
+      "values": {},
+      "frame": "01 06 00 10 00 00 88 0F"
+    },
+    {
+      "name": "messages/Sorties/Régler LED",
+      "message": {
+        "name": "Régler LED",
+        "description": "Exemple avec entier, liste de choix et valeur 16 bits big endian.",
+        "frame": [
+          "AA 55",
+          "10",
+          "{led}",
+          "{mode}",
+          "{luminosite}",
+          "{cs}"
+        ],
+        "params": {
+          "led": {
+            "type": "u8",
+            "label": "N° LED",
+            "default": 1,
+            "min": 1,
+            "max": 8
+          },
+          "mode": {
+            "type": "enum",
+            "size": "u8",
+            "choices": {
+              "off": 0,
+              "on": 1,
+              "clignote": 2
+            },
+            "default": "on"
+          },
+          "luminosite": {
+            "type": "u16be",
+            "label": "Luminosité",
+            "default": 512,
+            "min": 0,
+            "max": 1023,
+            "unit": "/1023"
+          }
+        },
+        "checksum": {
+          "algo": "xor8",
+          "start": 2
+        },
+        "group": "Sorties",
+        "_file": "Msg_Sorties.json",
+        "_path": "/home/claude/build/techmelec/SerialHex_Techmelec/tests/data/messages/Msg_Sorties.json"
+      },
+      "values": {},
+      "frame": "AA 55 10 01 01 02 00 12"
+    },
+    {
+      "name": "messages/Sorties/Activer relais",
+      "message": {
+        "name": "Activer relais",
+        "frame": [
+          "AA 55",
+          "11",
+          "{relais}",
+          "{etat}",
+          "{cs}"
+        ],
+        "params": {
+          "relais": {
+            "type": "u8",
+            "default": 0,
+            "min": 0,
+            "max": 3
+          },
+          "etat": {
+            "type": "bool",
+            "label": "Activé",
+            "default": true
+          }
+        },
+        "checksum": {
+          "algo": "sum8",
+          "start": 2
+        },
+        "group": "Sorties",
+        "_file": "Msg_Sorties.json",
+        "_path": "/home/claude/build/techmelec/SerialHex_Techmelec/tests/data/messages/Msg_Sorties.json"
+      },
+      "values": {},
+      "frame": "AA 55 11 00 01 12"
+    },
+    {
+      "name": "messages/Système/Ping",
+      "message": {
+        "name": "Ping",
+        "description": "Test de présence. Checksum XOR calculé à partir de l'octet 2 (après AA 55).",
+        "frame": [
+          "AA 55",
+          "01 00",
+          "{cs}"
+        ],
+        "checksum": {
+          "algo": "xor8",
+          "start": 2
+        },
+        "group": "Système",
+        "_file": "Msg_Systeme.json",
+        "_path": "/home/claude/build/techmelec/SerialHex_Techmelec/tests/data/messages/Msg_Systeme.json"
+      },
+      "values": {},
+      "frame": "AA 55 01 00 01"
+    },
+    {
+      "name": "messages/Système/Reset",
+      "message": {
+        "name": "Reset",
+        "frame": [
+          "AA 55 02 00",
+          "{cs}"
+        ],
+        "checksum": {
+          "algo": "xor8",
+          "start": 2
+        },
+        "group": "Système",
+        "_file": "Msg_Systeme.json",
+        "_path": "/home/claude/build/techmelec/SerialHex_Techmelec/tests/data/messages/Msg_Systeme.json"
+      },
+      "values": {},
+      "frame": "AA 55 02 00 02"
+    },
+    {
+      "name": "types #0",
+      "message": {
+        "name": "Tous les types",
+        "frame": [
+          "AA 55",
+          "{u8}",
+          "{i8}",
+          "{u16be}",
+          "{u16le}",
+          "{i16be}",
+          "{i16le}",
+          "{u32be}",
+          "{u32le}",
+          "{i32be}",
+          "{i32le}",
+          "{b}",
+          "{e}",
+          "{e16}",
+          "{h}",
+          "{a}",
+          "{af}",
+          "{cs}"
+        ],
+        "params": {
+          "u8": {
+            "type": "u8",
+            "default": 1
+          },
+          "i8": {
+            "type": "i8",
+            "default": 1
+          },
+          "u16be": {
+            "type": "u16be",
+            "default": 1
+          },
+          "u16le": {
+            "type": "u16le",
+            "default": 1
+          },
+          "i16be": {
+            "type": "i16be",
+            "default": 1
+          },
+          "i16le": {
+            "type": "i16le",
+            "default": 1
+          },
+          "u32be": {
+            "type": "u32be",
+            "default": 1
+          },
+          "u32le": {
+            "type": "u32le",
+            "default": 1
+          },
+          "i32be": {
+            "type": "i32be",
+            "default": 1
+          },
+          "i32le": {
+            "type": "i32le",
+            "default": 1
+          },
+          "b": {
+            "type": "bool",
+            "default": true
+          },
+          "e": {
+            "type": "enum",
+            "choices": {
+              "zero": 0,
+              "deux": 2
+            }
+          },
+          "e16": {
+            "type": "enum",
+            "size": "u16le",
+            "choices": {
+              "x": 4660
+            }
+          },
+          "h": {
+            "type": "hex",
+            "default": "DE AD"
+          },
+          "a": {
+            "type": "ascii",
+            "default": "Hi"
+          },
+          "af": {
+            "type": "ascii",
+            "length": 4,
+            "default": "ABCDEF"
+          }
+        },
+        "checksum": {
+          "algo": "xor8",
+          "start": 2
+        }
+      },
+      "values": {},
+      "frame": "AA 55 01 01 00 01 01 00 00 01 01 00 00 00 00 01 01 00 00 00 00 00 00 01 01 00 00 00 01 00 34 12 DE AD 48 69 41 42 43 44 71"
+    },
+    {
+      "name": "types #1",
+      "message": {
+        "name": "Tous les types",
+        "frame": [
+          "AA 55",
+          "{u8}",
+          "{i8}",
+          "{u16be}",
+          "{u16le}",
+          "{i16be}",
+          "{i16le}",
+          "{u32be}",
+          "{u32le}",
+          "{i32be}",
+          "{i32le}",
+          "{b}",
+          "{e}",
+          "{e16}",
+          "{h}",
+          "{a}",
+          "{af}",
+          "{cs}"
+        ],
+        "params": {
+          "u8": {
+            "type": "u8",
+            "default": 1
+          },
+          "i8": {
+            "type": "i8",
+            "default": 1
+          },
+          "u16be": {
+            "type": "u16be",
+            "default": 1
+          },
+          "u16le": {
+            "type": "u16le",
+            "default": 1
+          },
+          "i16be": {
+            "type": "i16be",
+            "default": 1
+          },
+          "i16le": {
+            "type": "i16le",
+            "default": 1
+          },
+          "u32be": {
+            "type": "u32be",
+            "default": 1
+          },
+          "u32le": {
+            "type": "u32le",
+            "default": 1
+          },
+          "i32be": {
+            "type": "i32be",
+            "default": 1
+          },
+          "i32le": {
+            "type": "i32le",
+            "default": 1
+          },
+          "b": {
+            "type": "bool",
+            "default": true
+          },
+          "e": {
+            "type": "enum",
+            "choices": {
+              "zero": 0,
+              "deux": 2
+            }
+          },
+          "e16": {
+            "type": "enum",
+            "size": "u16le",
+            "choices": {
+              "x": 4660
+            }
+          },
+          "h": {
+            "type": "hex",
+            "default": "DE AD"
+          },
+          "a": {
+            "type": "ascii",
+            "default": "Hi"
+          },
+          "af": {
+            "type": "ascii",
+            "length": 4,
+            "default": "ABCDEF"
+          }
+        },
+        "checksum": {
+          "algo": "xor8",
+          "start": 2
+        }
+      },
+      "values": {
+        "u8": 255,
+        "i8": -128,
+        "u16be": "0xBEEF",
+        "u16le": "0xBEEF",
+        "i16be": -2,
+        "i16le": -2,
+        "u32be": "0xDEADBEEF",
+        "u32le": 4294967295,
+        "i32be": -1,
+        "i32le": "-0x10",
+        "b": 0,
+        "e": "deux",
+        "h": "0x01,0x02",
+        "a": "",
+        "af": "Z"
+      },
+      "frame": "AA 55 FF 80 BE EF EF BE FF FE FE FF DE AD BE EF FF FF FF FF FF FF FF FF F0 FF FF FF 00 02 34 12 01 02 5A 00 00 00 2F"
+    },
+    {
+      "name": "types #2",
+      "message": {
+        "name": "Tous les types",
+        "frame": [
+          "AA 55",
+          "{u8}",
+          "{i8}",
+          "{u16be}",
+          "{u16le}",
+          "{i16be}",
+          "{i16le}",
+          "{u32be}",
+          "{u32le}",
+          "{i32be}",
+          "{i32le}",
+          "{b}",
+          "{e}",
+          "{e16}",
+          "{h}",
+          "{a}",
+          "{af}",
+          "{cs}"
+        ],
+        "params": {
+          "u8": {
+            "type": "u8",
+            "default": 1
+          },
+          "i8": {
+            "type": "i8",
+            "default": 1
+          },
+          "u16be": {
+            "type": "u16be",
+            "default": 1
+          },
+          "u16le": {
+            "type": "u16le",
+            "default": 1
+          },
+          "i16be": {
+            "type": "i16be",
+            "default": 1
+          },
+          "i16le": {
+            "type": "i16le",
+            "default": 1
+          },
+          "u32be": {
+            "type": "u32be",
+            "default": 1
+          },
+          "u32le": {
+            "type": "u32le",
+            "default": 1
+          },
+          "i32be": {
+            "type": "i32be",
+            "default": 1
+          },
+          "i32le": {
+            "type": "i32le",
+            "default": 1
+          },
+          "b": {
+            "type": "bool",
+            "default": true
+          },
+          "e": {
+            "type": "enum",
+            "choices": {
+              "zero": 0,
+              "deux": 2
+            }
+          },
+          "e16": {
+            "type": "enum",
+            "size": "u16le",
+            "choices": {
+              "x": 4660
+            }
+          },
+          "h": {
+            "type": "hex",
+            "default": "DE AD"
+          },
+          "a": {
+            "type": "ascii",
+            "default": "Hi"
+          },
+          "af": {
+            "type": "ascii",
+            "length": 4,
+            "default": "ABCDEF"
+          }
+        },
+        "checksum": {
+          "algo": "xor8",
+          "start": 2
+        }
+      },
+      "values": {
+        "u8": "0b1010",
+        "i8": "1_0",
+        "b": "oui",
+        "e": "7",
+        "h": "",
+        "a": "é"
+      },
+      "frame": "AA 55 0A 0A 00 01 01 00 00 01 01 00 00 00 00 01 01 00 00 00 00 00 00 01 01 00 00 00 01 07 34 12 E9 41 42 43 44 CD"
+    },
+    {
+      "name": "types #3",
+      "message": {
+        "name": "Tous les types",
+        "frame": [
+          "AA 55",
+          "{u8}",
+          "{i8}",
+          "{u16be}",
+          "{u16le}",
+          "{i16be}",
+          "{i16le}",
+          "{u32be}",
+          "{u32le}",
+          "{i32be}",
+          "{i32le}",
+          "{b}",
+          "{e}",
+          "{e16}",
+          "{h}",
+          "{a}",
+          "{af}",
+          "{cs}"
+        ],
+        "params": {
+          "u8": {
+            "type": "u8",
+            "default": 1
+          },
+          "i8": {
+            "type": "i8",
+            "default": 1
+          },
+          "u16be": {
+            "type": "u16be",
+            "default": 1
+          },
+          "u16le": {
+            "type": "u16le",
+            "default": 1
+          },
+          "i16be": {
+            "type": "i16be",
+            "default": 1
+          },
+          "i16le": {
+            "type": "i16le",
+            "default": 1
+          },
+          "u32be": {
+            "type": "u32be",
+            "default": 1
+          },
+          "u32le": {
+            "type": "u32le",
+            "default": 1
+          },
+          "i32be": {
+            "type": "i32be",
+            "default": 1
+          },
+          "i32le": {
+            "type": "i32le",
+            "default": 1
+          },
+          "b": {
+            "type": "bool",
+            "default": true
+          },
+          "e": {
+            "type": "enum",
+            "choices": {
+              "zero": 0,
+              "deux": 2
+            }
+          },
+          "e16": {
+            "type": "enum",
+            "size": "u16le",
+            "choices": {
+              "x": 4660
+            }
+          },
+          "h": {
+            "type": "hex",
+            "default": "DE AD"
+          },
+          "a": {
+            "type": "ascii",
+            "default": "Hi"
+          },
+          "af": {
+            "type": "ascii",
+            "length": 4,
+            "default": "ABCDEF"
+          }
+        },
+        "checksum": {
+          "algo": "xor8",
+          "start": 2
+        }
+      },
+      "values": {
+        "u8": "010"
+      },
+      "frame": "AA 55 0A 01 00 01 01 00 00 01 01 00 00 00 00 01 01 00 00 00 00 00 00 01 01 00 00 00 01 00 34 12 DE AD 48 69 41 42 43 44 7A"
+    },
+    {
+      "name": "erreur #0",
+      "message": {
+        "name": "Tous les types",
+        "frame": [
+          "AA 55",
+          "{u8}",
+          "{i8}",
+          "{u16be}",
+          "{u16le}",
+          "{i16be}",
+          "{i16le}",
+          "{u32be}",
+          "{u32le}",
+          "{i32be}",
+          "{i32le}",
+          "{b}",
+          "{e}",
+          "{e16}",
+          "{h}",
+          "{a}",
+          "{af}",
+          "{cs}"
+        ],
+        "params": {
+          "u8": {
+            "type": "u8",
+            "default": 1
+          },
+          "i8": {
+            "type": "i8",
+            "default": 1
+          },
+          "u16be": {
+            "type": "u16be",
+            "default": 1
+          },
+          "u16le": {
+            "type": "u16le",
+            "default": 1
+          },
+          "i16be": {
+            "type": "i16be",
+            "default": 1
+          },
+          "i16le": {
+            "type": "i16le",
+            "default": 1
+          },
+          "u32be": {
+            "type": "u32be",
+            "default": 1
+          },
+          "u32le": {
+            "type": "u32le",
+            "default": 1
+          },
+          "i32be": {
+            "type": "i32be",
+            "default": 1
+          },
+          "i32le": {
+            "type": "i32le",
+            "default": 1
+          },
+          "b": {
+            "type": "bool",
+            "default": true
+          },
+          "e": {
+            "type": "enum",
+            "choices": {
+              "zero": 0,
+              "deux": 2
+            }
+          },
+          "e16": {
+            "type": "enum",
+            "size": "u16le",
+            "choices": {
+              "x": 4660
+            }
+          },
+          "h": {
+            "type": "hex",
+            "default": "DE AD"
+          },
+          "a": {
+            "type": "ascii",
+            "default": "Hi"
+          },
+          "af": {
+            "type": "ascii",
+            "length": 4,
+            "default": "ABCDEF"
+          }
+        },
+        "checksum": {
+          "algo": "xor8",
+          "start": 2
+        }
+      },
+      "values": {
+        "u8": 256
+      },
+      "error": true
+    },
+    {
+      "name": "erreur #1",
+      "message": {
+        "name": "Tous les types",
+        "frame": [
+          "AA 55",
+          "{u8}",
+          "{i8}",
+          "{u16be}",
+          "{u16le}",
+          "{i16be}",
+          "{i16le}",
+          "{u32be}",
+          "{u32le}",
+          "{i32be}",
+          "{i32le}",
+          "{b}",
+          "{e}",
+          "{e16}",
+          "{h}",
+          "{a}",
+          "{af}",
+          "{cs}"
+        ],
+        "params": {
+          "u8": {
+            "type": "u8",
+            "default": 1
+          },
+          "i8": {
+            "type": "i8",
+            "default": 1
+          },
+          "u16be": {
+            "type": "u16be",
+            "default": 1
+          },
+          "u16le": {
+            "type": "u16le",
+            "default": 1
+          },
+          "i16be": {
+            "type": "i16be",
+            "default": 1
+          },
+          "i16le": {
+            "type": "i16le",
+            "default": 1
+          },
+          "u32be": {
+            "type": "u32be",
+            "default": 1
+          },
+          "u32le": {
+            "type": "u32le",
+            "default": 1
+          },
+          "i32be": {
+            "type": "i32be",
+            "default": 1
+          },
+          "i32le": {
+            "type": "i32le",
+            "default": 1
+          },
+          "b": {
+            "type": "bool",
+            "default": true
+          },
+          "e": {
+            "type": "enum",
+            "choices": {
+              "zero": 0,
+              "deux": 2
+            }
+          },
+          "e16": {
+            "type": "enum",
+            "size": "u16le",
+            "choices": {
+              "x": 4660
+            }
+          },
+          "h": {
+            "type": "hex",
+            "default": "DE AD"
+          },
+          "a": {
+            "type": "ascii",
+            "default": "Hi"
+          },
+          "af": {
+            "type": "ascii",
+            "length": 4,
+            "default": "ABCDEF"
+          }
+        },
+        "checksum": {
+          "algo": "xor8",
+          "start": 2
+        }
+      },
+      "values": {
+        "i8": 128
+      },
+      "error": true
+    },
+    {
+      "name": "erreur #2",
+      "message": {
+        "name": "Tous les types",
+        "frame": [
+          "AA 55",
+          "{u8}",
+          "{i8}",
+          "{u16be}",
+          "{u16le}",
+          "{i16be}",
+          "{i16le}",
+          "{u32be}",
+          "{u32le}",
+          "{i32be}",
+          "{i32le}",
+          "{b}",
+          "{e}",
+          "{e16}",
+          "{h}",
+          "{a}",
+          "{af}",
+          "{cs}"
+        ],
+        "params": {
+          "u8": {
+            "type": "u8",
+            "default": 1
+          },
+          "i8": {
+            "type": "i8",
+            "default": 1
+          },
+          "u16be": {
+            "type": "u16be",
+            "default": 1
+          },
+          "u16le": {
+            "type": "u16le",
+            "default": 1
+          },
+          "i16be": {
+            "type": "i16be",
+            "default": 1
+          },
+          "i16le": {
+            "type": "i16le",
+            "default": 1
+          },
+          "u32be": {
+            "type": "u32be",
+            "default": 1
+          },
+          "u32le": {
+            "type": "u32le",
+            "default": 1
+          },
+          "i32be": {
+            "type": "i32be",
+            "default": 1
+          },
+          "i32le": {
+            "type": "i32le",
+            "default": 1
+          },
+          "b": {
+            "type": "bool",
+            "default": true
+          },
+          "e": {
+            "type": "enum",
+            "choices": {
+              "zero": 0,
+              "deux": 2
+            }
+          },
+          "e16": {
+            "type": "enum",
+            "size": "u16le",
+            "choices": {
+              "x": 4660
+            }
+          },
+          "h": {
+            "type": "hex",
+            "default": "DE AD"
+          },
+          "a": {
+            "type": "ascii",
+            "default": "Hi"
+          },
+          "af": {
+            "type": "ascii",
+            "length": 4,
+            "default": "ABCDEF"
+          }
+        },
+        "checksum": {
+          "algo": "xor8",
+          "start": 2
+        }
+      },
+      "values": {
+        "u16be": -1
+      },
+      "error": true
+    },
+    {
+      "name": "erreur #3",
+      "message": {
+        "name": "Tous les types",
+        "frame": [
+          "AA 55",
+          "{u8}",
+          "{i8}",
+          "{u16be}",
+          "{u16le}",
+          "{i16be}",
+          "{i16le}",
+          "{u32be}",
+          "{u32le}",
+          "{i32be}",
+          "{i32le}",
+          "{b}",
+          "{e}",
+          "{e16}",
+          "{h}",
+          "{a}",
+          "{af}",
+          "{cs}"
+        ],
+        "params": {
+          "u8": {
+            "type": "u8",
+            "default": 1
+          },
+          "i8": {
+            "type": "i8",
+            "default": 1
+          },
+          "u16be": {
+            "type": "u16be",
+            "default": 1
+          },
+          "u16le": {
+            "type": "u16le",
+            "default": 1
+          },
+          "i16be": {
+            "type": "i16be",
+            "default": 1
+          },
+          "i16le": {
+            "type": "i16le",
+            "default": 1
+          },
+          "u32be": {
+            "type": "u32be",
+            "default": 1
+          },
+          "u32le": {
+            "type": "u32le",
+            "default": 1
+          },
+          "i32be": {
+            "type": "i32be",
+            "default": 1
+          },
+          "i32le": {
+            "type": "i32le",
+            "default": 1
+          },
+          "b": {
+            "type": "bool",
+            "default": true
+          },
+          "e": {
+            "type": "enum",
+            "choices": {
+              "zero": 0,
+              "deux": 2
+            }
+          },
+          "e16": {
+            "type": "enum",
+            "size": "u16le",
+            "choices": {
+              "x": 4660
+            }
+          },
+          "h": {
+            "type": "hex",
+            "default": "DE AD"
+          },
+          "a": {
+            "type": "ascii",
+            "default": "Hi"
+          },
+          "af": {
+            "type": "ascii",
+            "length": 4,
+            "default": "ABCDEF"
+          }
+        },
+        "checksum": {
+          "algo": "xor8",
+          "start": 2
+        }
+      },
+      "values": {
+        "u8": "abc"
+      },
+      "error": true
+    },
+    {
+      "name": "erreur #4",
+      "message": {
+        "name": "Tous les types",
+        "frame": [
+          "AA 55",
+          "{u8}",
+          "{i8}",
+          "{u16be}",
+          "{u16le}",
+          "{i16be}",
+          "{i16le}",
+          "{u32be}",
+          "{u32le}",
+          "{i32be}",
+          "{i32le}",
+          "{b}",
+          "{e}",
+          "{e16}",
+          "{h}",
+          "{a}",
+          "{af}",
+          "{cs}"
+        ],
+        "params": {
+          "u8": {
+            "type": "u8",
+            "default": 1
+          },
+          "i8": {
+            "type": "i8",
+            "default": 1
+          },
+          "u16be": {
+            "type": "u16be",
+            "default": 1
+          },
+          "u16le": {
+            "type": "u16le",
+            "default": 1
+          },
+          "i16be": {
+            "type": "i16be",
+            "default": 1
+          },
+          "i16le": {
+            "type": "i16le",
+            "default": 1
+          },
+          "u32be": {
+            "type": "u32be",
+            "default": 1
+          },
+          "u32le": {
+            "type": "u32le",
+            "default": 1
+          },
+          "i32be": {
+            "type": "i32be",
+            "default": 1
+          },
+          "i32le": {
+            "type": "i32le",
+            "default": 1
+          },
+          "b": {
+            "type": "bool",
+            "default": true
+          },
+          "e": {
+            "type": "enum",
+            "choices": {
+              "zero": 0,
+              "deux": 2
+            }
+          },
+          "e16": {
+            "type": "enum",
+            "size": "u16le",
+            "choices": {
+              "x": 4660
+            }
+          },
+          "h": {
+            "type": "hex",
+            "default": "DE AD"
+          },
+          "a": {
+            "type": "ascii",
+            "default": "Hi"
+          },
+          "af": {
+            "type": "ascii",
+            "length": 4,
+            "default": "ABCDEF"
+          }
+        },
+        "checksum": {
+          "algo": "xor8",
+          "start": 2
+        }
+      },
+      "values": {
+        "h": "ABC"
+      },
+      "error": true
+    },
+    {
+      "name": "erreur #5",
+      "message": {
+        "name": "Tous les types",
+        "frame": [
+          "AA 55",
+          "{u8}",
+          "{i8}",
+          "{u16be}",
+          "{u16le}",
+          "{i16be}",
+          "{i16le}",
+          "{u32be}",
+          "{u32le}",
+          "{i32be}",
+          "{i32le}",
+          "{b}",
+          "{e}",
+          "{e16}",
+          "{h}",
+          "{a}",
+          "{af}",
+          "{cs}"
+        ],
+        "params": {
+          "u8": {
+            "type": "u8",
+            "default": 1
+          },
+          "i8": {
+            "type": "i8",
+            "default": 1
+          },
+          "u16be": {
+            "type": "u16be",
+            "default": 1
+          },
+          "u16le": {
+            "type": "u16le",
+            "default": 1
+          },
+          "i16be": {
+            "type": "i16be",
+            "default": 1
+          },
+          "i16le": {
+            "type": "i16le",
+            "default": 1
+          },
+          "u32be": {
+            "type": "u32be",
+            "default": 1
+          },
+          "u32le": {
+            "type": "u32le",
+            "default": 1
+          },
+          "i32be": {
+            "type": "i32be",
+            "default": 1
+          },
+          "i32le": {
+            "type": "i32le",
+            "default": 1
+          },
+          "b": {
+            "type": "bool",
+            "default": true
+          },
+          "e": {
+            "type": "enum",
+            "choices": {
+              "zero": 0,
+              "deux": 2
+            }
+          },
+          "e16": {
+            "type": "enum",
+            "size": "u16le",
+            "choices": {
+              "x": 4660
+            }
+          },
+          "h": {
+            "type": "hex",
+            "default": "DE AD"
+          },
+          "a": {
+            "type": "ascii",
+            "default": "Hi"
+          },
+          "af": {
+            "type": "ascii",
+            "length": 4,
+            "default": "ABCDEF"
+          }
+        },
+        "checksum": {
+          "algo": "xor8",
+          "start": 2
+        }
+      },
+      "values": {
+        "h": "GG"
+      },
+      "error": true
+    },
+    {
+      "name": "checksum xor8 start=0",
+      "message": {
+        "name": "xor8 start=0",
+        "frame": [
+          "AA 55 01 02 03 FF 80 7F",
+          "{cs}",
+          "0D"
+        ],
+        "checksum": {
+          "algo": "xor8",
+          "start": 0
+        }
+      },
+      "values": {},
+      "frame": "AA 55 01 02 03 FF 80 7F FF 0D"
+    },
+    {
+      "name": "checksum xor8 start=2",
+      "message": {
+        "name": "xor8 start=2",
+        "frame": [
+          "AA 55 01 02 03 FF 80 7F",
+          "{cs}",
+          "0D"
+        ],
+        "checksum": {
+          "algo": "xor8",
+          "start": 2
+        }
+      },
+      "values": {},
+      "frame": "AA 55 01 02 03 FF 80 7F 00 0D"
+    },
+    {
+      "name": "checksum sum8 start=0",
+      "message": {
+        "name": "sum8 start=0",
+        "frame": [
+          "AA 55 01 02 03 FF 80 7F",
+          "{cs}",
+          "0D"
+        ],
+        "checksum": {
+          "algo": "sum8",
+          "start": 0
+        }
+      },
+      "values": {},
+      "frame": "AA 55 01 02 03 FF 80 7F 03 0D"
+    },
+    {
+      "name": "checksum sum8 start=2",
+      "message": {
+        "name": "sum8 start=2",
+        "frame": [
+          "AA 55 01 02 03 FF 80 7F",
+          "{cs}",
+          "0D"
+        ],
+        "checksum": {
+          "algo": "sum8",
+          "start": 2
+        }
+      },
+      "values": {},
+      "frame": "AA 55 01 02 03 FF 80 7F 04 0D"
+    },
+    {
+      "name": "checksum sum8_2c start=0",
+      "message": {
+        "name": "sum8_2c start=0",
+        "frame": [
+          "AA 55 01 02 03 FF 80 7F",
+          "{cs}",
+          "0D"
+        ],
+        "checksum": {
+          "algo": "sum8_2c",
+          "start": 0
+        }
+      },
+      "values": {},
+      "frame": "AA 55 01 02 03 FF 80 7F FD 0D"
+    },
+    {
+      "name": "checksum sum8_2c start=2",
+      "message": {
+        "name": "sum8_2c start=2",
+        "frame": [
+          "AA 55 01 02 03 FF 80 7F",
+          "{cs}",
+          "0D"
+        ],
+        "checksum": {
+          "algo": "sum8_2c",
+          "start": 2
+        }
+      },
+      "values": {},
+      "frame": "AA 55 01 02 03 FF 80 7F FC 0D"
+    },
+    {
+      "name": "checksum crc8 start=0",
+      "message": {
+        "name": "crc8 start=0",
+        "frame": [
+          "AA 55 01 02 03 FF 80 7F",
+          "{cs}",
+          "0D"
+        ],
+        "checksum": {
+          "algo": "crc8",
+          "start": 0
+        }
+      },
+      "values": {},
+      "frame": "AA 55 01 02 03 FF 80 7F 63 0D"
+    },
+    {
+      "name": "checksum crc8 start=2",
+      "message": {
+        "name": "crc8 start=2",
+        "frame": [
+          "AA 55 01 02 03 FF 80 7F",
+          "{cs}",
+          "0D"
+        ],
+        "checksum": {
+          "algo": "crc8",
+          "start": 2
+        }
+      },
+      "values": {},
+      "frame": "AA 55 01 02 03 FF 80 7F 30 0D"
+    },
+    {
+      "name": "checksum crc16_modbus start=0",
+      "message": {
+        "name": "crc16_modbus start=0",
+        "frame": [
+          "AA 55 01 02 03 FF 80 7F",
+          "{cs}",
+          "0D"
+        ],
+        "checksum": {
+          "algo": "crc16_modbus",
+          "start": 0
+        }
+      },
+      "values": {},
+      "frame": "AA 55 01 02 03 FF 80 7F A7 4C 0D"
+    },
+    {
+      "name": "checksum crc16_modbus start=2",
+      "message": {
+        "name": "crc16_modbus start=2",
+        "frame": [
+          "AA 55 01 02 03 FF 80 7F",
+          "{cs}",
+          "0D"
+        ],
+        "checksum": {
+          "algo": "crc16_modbus",
+          "start": 2
+        }
+      },
+      "values": {},
+      "frame": "AA 55 01 02 03 FF 80 7F 68 5E 0D"
+    },
+    {
+      "name": "raw et majuscules",
+      "message": {
+        "name": "raw",
+        "frame": [
+          "53",
+          "{r}",
+          "{u}",
+          "{cs}"
+        ],
+        "params": {
+          "r": {
+            "type": "RAW",
+            "default": "01 02 03"
+          },
+          "u": {
+            "type": "U16LE",
+            "default": 258
+          }
+        },
+        "checksum": {
+          "algo": "crc16_modbus"
+        }
+      },
+      "values": {},
+      "frame": "53 01 02 03 02 01 00 A0"
+    },
+    {
+      "name": "bornes v=10",
+      "message": {
+        "name": "bornes",
+        "frame": [
+          "{v}"
+        ],
+        "params": {
+          "v": {
+            "type": "u16be",
+            "min": 10,
+            "max": "0x100",
+            "default": 10
+          }
+        }
+      },
+      "values": {
+        "v": 10
+      },
+      "frame": "00 0A"
+    },
+    {
+      "name": "bornes v=256",
+      "message": {
+        "name": "bornes",
+        "frame": [
+          "{v}"
+        ],
+        "params": {
+          "v": {
+            "type": "u16be",
+            "min": 10,
+            "max": "0x100",
+            "default": 10
+          }
+        }
+      },
+      "values": {
+        "v": 256
+      },
+      "frame": "01 00"
+    },
+    {
+      "name": "bornes v=9",
+      "message": {
+        "name": "bornes",
+        "frame": [
+          "{v}"
+        ],
+        "params": {
+          "v": {
+            "type": "u16be",
+            "min": 10,
+            "max": "0x100",
+            "default": 10
+          }
+        }
+      },
+      "values": {
+        "v": 9
+      },
+      "error": true
+    },
+    {
+      "name": "bornes v=257",
+      "message": {
+        "name": "bornes",
+        "frame": [
+          "{v}"
+        ],
+        "params": {
+          "v": {
+            "type": "u16be",
+            "min": 10,
+            "max": "0x100",
+            "default": 10
+          }
+        }
+      },
+      "values": {
+        "v": 257
+      },
+      "error": true
+    }
+  ]
+}

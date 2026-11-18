@@ -1,0 +1,29 @@
+{
+  "group": "Système",
+  "messages": [
+    {
+      "name": "Ping",
+      "description": "Test de présence. Checksum XOR calculé à partir de l'octet 2 (après AA 55).",
+      "frame": [
+        "AA 55",
+        "01 00",
+        "{cs}"
+      ],
+      "checksum": {
+        "algo": "xor8",
+        "start": 2
+      }
+    },
+    {
+      "name": "Reset",
+      "frame": [
+        "AA 55 02 00",
+        "{cs}"
+      ],
+      "checksum": {
+        "algo": "xor8",
+        "start": 2
+      }
+    }
+  ]
+}

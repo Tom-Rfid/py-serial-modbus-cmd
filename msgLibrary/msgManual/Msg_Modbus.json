@@ -1,0 +1,558 @@
+// Trames Modbus RTU STANDARD, toutes prêtes pour l'onglet Manuel (n'importe quel appareil Modbus).
+// CRC16 Modbus ajouté automatiquement ({cs}, octet de poids faible en premier).
+// Les mêmes fonctions, décodées champ par champ : onglet Protocole, protocoles Modbus RTU / ASCII / TCP
+// (msgLibrary/msgList/modbus/Msg_Modbus_Standard.json).
+{
+  "group": "Modbus RTU",
+  "messages": [
+    {
+      "name": "Modbus 01 - lire bobines",
+      "description": "Fonction 01 (Read Coils) : 1 à 2000 bobines. Réponse : nombre d'octets puis 1 bit par bobine. CRC16 Modbus ajouté automatiquement.",
+      "frame": [
+        "{esclave}",
+        "01",
+        "{adresse}",
+        "{nombre}",
+        "{cs}"
+      ],
+      "params": {
+        "esclave": {
+          "type": "u8",
+          "label": "Adresse esclave",
+          "default": 1,
+          "min": 1,
+          "max": 247
+        },
+        "adresse": {
+          "type": "u16be",
+          "label": "Adresse de départ",
+          "default": "0x0000"
+        },
+        "nombre": {
+          "type": "u16be",
+          "label": "Nombre de bobines",
+          "default": 8,
+          "min": 1,
+          "max": 2000
+        }
+      },
+      "checksum": {
+        "algo": "crc16_modbus",
+        "start": 0
+      }
+    },
+    {
+      "name": "Modbus 02 - lire entrées TOR",
+      "description": "Fonction 02 (Read Discrete Inputs) : 1 à 2000 entrées tout-ou-rien.",
+      "frame": [
+        "{esclave}",
+        "02",
+        "{adresse}",
+        "{nombre}",
+        "{cs}"
+      ],
+      "params": {
+        "esclave": {
+          "type": "u8",
+          "label": "Adresse esclave",
+          "default": 1,
+          "min": 1,
+          "max": 247
+        },
+        "adresse": {
+          "type": "u16be",
+          "label": "Adresse de départ",
+          "default": "0x0000"
+        },
+        "nombre": {
+          "type": "u16be",
+          "label": "Nombre d'entrées",
+          "default": 8,
+          "min": 1,
+          "max": 2000
+        }
+      },
+      "checksum": {
+        "algo": "crc16_modbus",
+        "start": 0
+      }
+    },
+    {
+      "name": "Modbus 03 - lire registres de maintien",
+      "description": "Fonction 03 (Read Holding Registers) : 1 à 125 registres de 16 bits. Exemple : esclave 1, adresse 0, 2 registres -> 01 03 00 00 00 02 C4 0B.",
+      "frame": [
+        "{esclave}",
+        "03",
+        "{adresse}",
+        "{nombre}",
+        "{cs}"
+      ],
+      "params": {
+        "esclave": {
+          "type": "u8",
+          "label": "Adresse esclave",
+          "default": 1,
+          "min": 1,
+          "max": 247
+        },
+        "adresse": {
+          "type": "u16be",
+          "label": "Adresse de départ",
+          "default": "0x0000"
+        },
+        "nombre": {
+          "type": "u16be",
+          "label": "Nombre de registres",
+          "default": 2,
+          "min": 1,
+          "max": 125
+        }
+      },
+      "checksum": {
+        "algo": "crc16_modbus",
+        "start": 0
+      }
+    },
+    {
+      "name": "Modbus 04 - lire registres d'entrée",
+      "description": "Fonction 04 (Read Input Registers) : 1 à 125 registres d'entrée (mesures, lecture seule).",
+      "frame": [
+        "{esclave}",
+        "04",
+        "{adresse}",
+        "{nombre}",
+        "{cs}"
+      ],
+      "params": {
+        "esclave": {
+          "type": "u8",
+          "label": "Adresse esclave",
+          "default": 1,
+          "min": 1,
+          "max": 247
+        },
+        "adresse": {
+          "type": "u16be",
+          "label": "Adresse de départ",
+          "default": "0x0000"
+        },
+        "nombre": {
+          "type": "u16be",
+          "label": "Nombre de registres",
+          "default": 1,
+          "min": 1,
+          "max": 125
+        }
+      },
+      "checksum": {
+        "algo": "crc16_modbus",
+        "start": 0
+      }
+    },
+    {
+      "name": "Modbus 05 - écrire une bobine",
+      "description": "Fonction 05 (Write Single Coil) : ON = FF 00, OFF = 00 00. Réponse : écho de la requête.",
+      "frame": [
+        "{esclave}",
+        "05",
+        "{adresse}",
+        "{etat}",
+        "{cs}"
+      ],
+      "params": {
+        "esclave": {
+          "type": "u8",
+          "label": "Adresse esclave",
+          "default": 1,
+          "min": 1,
+          "max": 247
+        },
+        "adresse": {
+          "type": "u16be",
+          "label": "Adresse",
+          "default": "0x0000"
+        },
+        "etat": {
+          "type": "enum",
+          "label": "État",
+          "choices": {
+            "ON": 65280,
+            "OFF": 0
+          },
+          "size": "u16be"
+        }
+      },
+      "checksum": {
+        "algo": "crc16_modbus",
+        "start": 0
+      }
+    },
+    {
+      "name": "Modbus 06 - écrire registre",
+      "description": "Fonction 06 (Write Single Register). Réponse : écho de la requête.",
+      "frame": [
+        "{esclave}",
+        "06",
+        "{registre}",
+        "{valeur}",
+        "{cs}"
+      ],
+      "params": {
+        "esclave": {
+          "type": "u8",
+          "label": "Adresse esclave",
+          "default": 1,
+          "min": 1,
+          "max": 247
+        },
+        "registre": {
+          "type": "u16be",
+          "label": "Adresse",
+          "default": "0x0010"
+        },
+        "valeur": {
+          "type": "u16be",
+          "label": "Valeur",
+          "default": 0
+        }
+      },
+      "checksum": {
+        "algo": "crc16_modbus",
+        "start": 0
+      }
+    },
+    {
+      "name": "Modbus 07 - lire état d'exception",
+      "description": "Fonction 07 (Read Exception Status), ligne série seulement : 8 bits d'état propres à l'appareil.",
+      "frame": [
+        "{esclave}",
+        "07",
+        "{cs}"
+      ],
+      "params": {
+        "esclave": {
+          "type": "u8",
+          "label": "Adresse esclave",
+          "default": 1,
+          "min": 1,
+          "max": 247
+        }
+      },
+      "checksum": {
+        "algo": "crc16_modbus",
+        "start": 0
+      }
+    },
+    {
+      "name": "Modbus 08 - diagnostic écho",
+      "description": "Fonction 08 (Diagnostics), sous-fonction 00 00 : l'esclave renvoie la donnée telle quelle (test de liaison). Ligne série seulement.",
+      "frame": [
+        "{esclave}",
+        "08",
+        "00 00",
+        "{donnee}",
+        "{cs}"
+      ],
+      "params": {
+        "esclave": {
+          "type": "u8",
+          "label": "Adresse esclave",
+          "default": 1,
+          "min": 1,
+          "max": 247
+        },
+        "donnee": {
+          "type": "hex",
+          "label": "Donnée (2 octets)",
+          "default": "A5 37"
+        }
+      },
+      "checksum": {
+        "algo": "crc16_modbus",
+        "start": 0
+      }
+    },
+    {
+      "name": "Modbus 0B - compteur d'événements",
+      "description": "Fonction 0B (Get Comm Event Counter), ligne série seulement : état et nombre de messages traités.",
+      "frame": [
+        "{esclave}",
+        "0B",
+        "{cs}"
+      ],
+      "params": {
+        "esclave": {
+          "type": "u8",
+          "label": "Adresse esclave",
+          "default": 1,
+          "min": 1,
+          "max": 247
+        }
+      },
+      "checksum": {
+        "algo": "crc16_modbus",
+        "start": 0
+      }
+    },
+    {
+      "name": "Modbus 0F - écrire plusieurs bobines",
+      "description": "Fonction 0F (Write Multiple Coils) : nombre d'octets = nombre de bobines / 8 arrondi au-dessus ; valeurs : 1 bit par bobine, bit 0 = première.",
+      "frame": [
+        "{esclave}",
+        "0F",
+        "{adresse}",
+        "{nombre}",
+        "{octets}",
+        "{valeurs}",
+        "{cs}"
+      ],
+      "params": {
+        "esclave": {
+          "type": "u8",
+          "label": "Adresse esclave",
+          "default": 1,
+          "min": 1,
+          "max": 247
+        },
+        "adresse": {
+          "type": "u16be",
+          "label": "Adresse de départ",
+          "default": "0x0000"
+        },
+        "nombre": {
+          "type": "u16be",
+          "label": "Nombre de bobines",
+          "default": 8,
+          "min": 1,
+          "max": 1968
+        },
+        "octets": {
+          "type": "u8",
+          "label": "Nombre d'octets",
+          "default": 1
+        },
+        "valeurs": {
+          "type": "hex",
+          "label": "Valeurs",
+          "default": "FF"
+        }
+      },
+      "checksum": {
+        "algo": "crc16_modbus",
+        "start": 0
+      }
+    },
+    {
+      "name": "Modbus 10 - écrire plusieurs registres",
+      "description": "Fonction 10 (Write Multiple Registers) : nombre d'octets = 2 × nombre de registres ; valeurs : 2 octets par registre, poids fort en premier.",
+      "frame": [
+        "{esclave}",
+        "10",
+        "{adresse}",
+        "{nombre}",
+        "{octets}",
+        "{valeurs}",
+        "{cs}"
+      ],
+      "params": {
+        "esclave": {
+          "type": "u8",
+          "label": "Adresse esclave",
+          "default": 1,
+          "min": 1,
+          "max": 247
+        },
+        "adresse": {
+          "type": "u16be",
+          "label": "Adresse de départ",
+          "default": "0x0000"
+        },
+        "nombre": {
+          "type": "u16be",
+          "label": "Nombre de registres",
+          "default": 2,
+          "min": 1,
+          "max": 123
+        },
+        "octets": {
+          "type": "u8",
+          "label": "Nombre d'octets",
+          "default": 4
+        },
+        "valeurs": {
+          "type": "hex",
+          "label": "Valeurs",
+          "default": "00 0A 01 02"
+        }
+      },
+      "checksum": {
+        "algo": "crc16_modbus",
+        "start": 0
+      }
+    },
+    {
+      "name": "Modbus 11 - identifiant esclave",
+      "description": "Fonction 11 (Report Server ID), ligne série seulement : identifiant, état de marche et données de l'appareil.",
+      "frame": [
+        "{esclave}",
+        "11",
+        "{cs}"
+      ],
+      "params": {
+        "esclave": {
+          "type": "u8",
+          "label": "Adresse esclave",
+          "default": 1,
+          "min": 1,
+          "max": 247
+        }
+      },
+      "checksum": {
+        "algo": "crc16_modbus",
+        "start": 0
+      }
+    },
+    {
+      "name": "Modbus 16 - écrire registre avec masque",
+      "description": "Fonction 16 (Mask Write Register) : résultat = (valeur AND masque ET) OR (masque OU AND NOT masque ET).",
+      "frame": [
+        "{esclave}",
+        "16",
+        "{registre}",
+        "{et}",
+        "{ou}",
+        "{cs}"
+      ],
+      "params": {
+        "esclave": {
+          "type": "u8",
+          "label": "Adresse esclave",
+          "default": 1,
+          "min": 1,
+          "max": 247
+        },
+        "registre": {
+          "type": "u16be",
+          "label": "Adresse",
+          "default": "0x0000"
+        },
+        "et": {
+          "type": "u16be",
+          "label": "Masque ET",
+          "default": "0xFFFF"
+        },
+        "ou": {
+          "type": "u16be",
+          "label": "Masque OU",
+          "default": "0x0000"
+        }
+      },
+      "checksum": {
+        "algo": "crc16_modbus",
+        "start": 0
+      }
+    },
+    {
+      "name": "Modbus 17 - lire et écrire des registres",
+      "description": "Fonction 17 (Read/Write Multiple Registers) : écrit puis lit des registres en une trame.",
+      "frame": [
+        "{esclave}",
+        "17",
+        "{lecture}",
+        "{nb_lecture}",
+        "{ecriture}",
+        "{nb_ecriture}",
+        "{octets}",
+        "{valeurs}",
+        "{cs}"
+      ],
+      "params": {
+        "esclave": {
+          "type": "u8",
+          "label": "Adresse esclave",
+          "default": 1,
+          "min": 1,
+          "max": 247
+        },
+        "lecture": {
+          "type": "u16be",
+          "label": "Adresse de lecture",
+          "default": "0x0000"
+        },
+        "nb_lecture": {
+          "type": "u16be",
+          "label": "Nombre à lire",
+          "default": 1,
+          "min": 1,
+          "max": 125
+        },
+        "ecriture": {
+          "type": "u16be",
+          "label": "Adresse d'écriture",
+          "default": "0x0000"
+        },
+        "nb_ecriture": {
+          "type": "u16be",
+          "label": "Nombre à écrire",
+          "default": 1,
+          "min": 1,
+          "max": 121
+        },
+        "octets": {
+          "type": "u8",
+          "label": "Nombre d'octets",
+          "default": 2
+        },
+        "valeurs": {
+          "type": "hex",
+          "label": "Valeurs",
+          "default": "00 00"
+        }
+      },
+      "checksum": {
+        "algo": "crc16_modbus",
+        "start": 0
+      }
+    },
+    {
+      "name": "Modbus 2B - lire identification",
+      "description": "Fonction 2B / MEI 0E (Read Device Identification) : code 01 = base (fabricant, produit, version), 02 = standard, 03 = étendue.",
+      "frame": [
+        "{esclave}",
+        "2B",
+        "0E",
+        "{code}",
+        "{objet}",
+        "{cs}"
+      ],
+      "params": {
+        "esclave": {
+          "type": "u8",
+          "label": "Adresse esclave",
+          "default": 1,
+          "min": 1,
+          "max": 247
+        },
+        "code": {
+          "type": "enum",
+          "label": "Code",
+          "choices": {
+            "base": 1,
+            "standard": 2,
+            "étendue": 3
+          },
+          "size": "u8"
+        },
+        "objet": {
+          "type": "u8",
+          "label": "Objet de départ",
+          "default": 0
+        }
+      },
+      "checksum": {
+        "algo": "crc16_modbus",
+        "start": 0
+      }
+    }
+  ]
+}

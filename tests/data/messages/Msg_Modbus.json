@@ -1,0 +1,37 @@
+{
+  "group": "Modbus",
+  "messages": [
+    {
+      "name": "Modbus - écrire registre",
+      "description": "Fonction 06, CRC16 Modbus ajouté automatiquement (little endian).",
+      "frame": [
+        "{esclave}",
+        "06",
+        "{registre}",
+        "{valeur}",
+        "{cs}"
+      ],
+      "params": {
+        "esclave": {
+          "type": "u8",
+          "label": "Adresse esclave",
+          "default": 1,
+          "min": 1,
+          "max": 247
+        },
+        "registre": {
+          "type": "u16be",
+          "default": "0x0010"
+        },
+        "valeur": {
+          "type": "u16be",
+          "default": 0
+        }
+      },
+      "checksum": {
+        "algo": "crc16_modbus",
+        "start": 0
+      }
+    }
+  ]
+}

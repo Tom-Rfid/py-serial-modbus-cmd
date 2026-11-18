@@ -1,0 +1,74 @@
+{
+  // Configurations de lancement / débogage (F5, ou panneau « Exécuter et déboguer »).
+  // Nécessite l'extension « Python Debugger » (ms-python.debugpy), proposée à l'ouverture du dossier,
+  // et Python 3.9 ou plus récent (debugpy ne prend plus en charge 3.8) : setup.bat crée un .venv en 3.9.
+  // L'interpréteur utilisé est celui du .venv (voir settings.json), créé par setup.bat.
+  "version": "0.2.0",
+  "configurations": [
+    {
+      // Lance l'interface avec le débogueur : points d'arrêt, variables, pas à pas
+      "name": "SerialHex : interface (debug)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/serialhex.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      // Idem, mais le débogueur entre aussi dans le code des bibliothèques (pyserial, tkinter)
+      "name": "SerialHex : interface (debug, tout le code)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/serialhex.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      // Fusionne msgLibrary/msgManual/Msg_*.json -> messages_merged.json
+      "name": "SerialHex : fusionner les messages (--merge)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/serialhex.py",
+      "args": ["--merge"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      // Terminal hexa en ligne de commande ; le port est demandé au lancement
+      "name": "Terminal hexa (tools/hexterm.py)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/tools/hexterm.py",
+      "args": ["${input:comPort}", "${input:baudRate}"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      // Tous les tests Python, avec le débogueur (points d'arrêt dans les tests ou dans core/)
+      "name": "Tests Python (debug)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "unittest",
+      "args": ["discover", "tests", "-v"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      // Exécute le fichier Python ouvert dans l'éditeur
+      "name": "Fichier Python courant",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "env": { "PYTHONPATH": "${workspaceFolder}" }
+    }
+  ],
+  "inputs": [
+    { "id": "comPort", "type": "promptString", "description": "Port série", "default": "COM3" },
+    { "id": "baudRate", "type": "promptString", "description": "Vitesse (bauds)", "default": "115200" }
+  ]
+}

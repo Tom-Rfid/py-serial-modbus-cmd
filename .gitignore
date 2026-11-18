@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+/settings.json
+/messages_merged.json
+.venv/
+# Réglages VS Code personnels (couleurs Peacock...)
+*.code-workspace
+# Traces enregistrées (sauf les exemples fournis : traces/exemples/)
+/traces/*
+!/traces/exemples/

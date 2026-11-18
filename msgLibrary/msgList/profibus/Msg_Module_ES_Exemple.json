@@ -1,0 +1,86 @@
+// =============================================================================================
+//  Commandes d'un esclave PROFIBUS DP FICTIF : « module d'E/S exemple », adresse 5, maître 2.
+//  Commands of a FICTITIOUS PROFIBUS DP slave: "example I/O module", address 5, master 2.
+// ---------------------------------------------------------------------------------------------
+//  Utilisé par profibus_fdl.json. L'adresse de l'esclave se saisit comme REQUEST ID (champ DA).
+//  Used by profibus_fdl.json. The slave address is entered as REQUEST ID (field DA).
+//
+//  "header" donne les bits d'extension et l'adresse du maître ; avec DA_EXT = SA_EXT = 1, les
+//  deux premiers octets de DATA sont les SAP de destination et de source.
+//  "header" gives the extension bits and the master address; with DA_EXT = SA_EXT = 1, the
+//  first two DATA bytes are the destination and source SAPs.
+//
+//  Exemple de diagnostic / diagnostics example :
+//    TX 68 05 05 68 85 82 6D 3C 3E EE 16
+//    RX 68 0B 0B 68 82 85 08 3E 3C 02 05 00 02 AB CD 0A 16
+//       statut 1 = 02 (pas prêt pour l'échange), statut 2 = 05, maître 2, identifiant 0xABCD
+// =============================================================================================
+{
+  "protocol": "PROFIBUS FDL",
+  "group": "DP",
+  "commands": [
+    {
+      "name": "Demande d'état FDL",
+      "name_en": "Request FDL status",
+      "id": "0x49",
+      "group": "FDL",
+      "variant": "SD1",
+      "header": {"DA_EXT": 0, "SA_EXT": 0, "SA": 2},
+      "description": "L'esclave répond par une trame SD1 (FC 0x00 = prêt). Trame : 10 05 02 49 50 16",
+      "description_en": "The slave answers with an SD1 frame (FC 0x00 = ready). Frame: 10 05 02 49 50 16",
+      "tx": [],
+      "rx": []
+    },
+    {
+      "name": "Lire le diagnostic (Slave_Diag)",
+      "name_en": "Read diagnostics (Slave_Diag)",
+      "id": "0x6D",
+      "group": "DP",
+      "variant": "SD2",
+      "header": {"DA_EXT": 1, "SA_EXT": 1, "SA": 2},
+      "description": "SAP 60 -> 62. Réponse : 6 octets de diagnostic standard",
+      "description_en": "SAP 60 -> 62. Reply: 6 bytes of standard diagnostics",
+      "tx": [
+        {"name": "DSAP", "label": "SAP destination", "label_en": "Destination SAP", "type": "uint8", "default": 60, "min": 60, "max": 60},
+        {"name": "SSAP", "label": "SAP source", "label_en": "Source SAP", "type": "uint8", "default": 62, "min": 62, "max": 62}
+      ],
+      "rx": [
+        {"name": "DSAP", "label": "SAP destination", "label_en": "Destination SAP", "type": "uint8"},
+        {"name": "SSAP", "label": "SAP source", "label_en": "Source SAP", "type": "uint8"},
+        {"name": "status1", "label": "Statut 1", "label_en": "Status 1", "type": "uint8",
+         "bits": {"0": "station absente / station non-existent", "1": "pas prête / station not ready",
+                  "2": "erreur de configuration / configuration fault", "3": "diagnostic étendu / extended diagnostics",
+                  "4": "fonction non supportée / not supported", "5": "réponse invalide / invalid slave response",
+                  "6": "erreur de paramétrage / parameter fault", "7": "verrouillée par un autre maître / master lock"}},
+        {"name": "status2", "label": "Statut 2", "label_en": "Status 2", "type": "uint8",
+         "choices": {"normal (bit 2 = 1)": "0x04", "paramétrage demandé / parameter request (0x05)": "0x05",
+                     "chien de garde actif / watchdog on (0x0C)": "0x0C"}},
+        {"name": "status3", "label": "Statut 3", "label_en": "Status 3", "type": "uint8",
+         "bits": {"7": "débordement du diagnostic / diagnostics overflow"}},
+        {"name": "master", "label": "Maître (0xFF = aucun / none)", "label_en": "Master (0xFF = none)", "type": "uint8"},
+        {"name": "ident", "label": "Identifiant", "label_en": "Ident number", "type": "raw", "count": 2}
+      ]
+    },
+    {
+      "name": "Échange de données (Data_Exchange)",
+      "name_en": "Data exchange (Data_Exchange)",
+      "id": "0x7D",
+      "group": "DP",
+      "variant": "SD2",
+      "header": {"DA_EXT": 0, "SA_EXT": 0, "SA": 2},
+      "description": "Écrit 2 octets de sorties, lit 2 octets d'entrées (SAP par défaut, sans extension)",
+      "description_en": "Writes 2 output bytes, reads 2 input bytes (default SAP, no extension)",
+      "tx": [
+        {"name": "outputs", "label": "Sorties", "label_en": "Outputs", "type": "uint16", "default": "0x0000"}
+      ],
+      "rx": [
+        {"name": "inputs", "label": "Entrées", "label_en": "Inputs", "type": "uint16",
+         "bits": {"0": "entrée 1 / input 1", "1": "entrée 2 / input 2", "2": "entrée 3 / input 3", "3": "entrée 4 / input 4"}}
+      ],
+      "presets": [
+        {"name": "Toutes à 0 / all off", "values": {"outputs": "0x0000"}},
+        {"name": "Sortie 1 / output 1", "values": {"outputs": "0x0001"}}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,716 @@
+{
+ "_comment": "Traductions anglaises de l'interface (ui/i18n.py). strings : texte français exact -> anglais ; patterns : messages construits par core/, {1}, {2}… = parties entre parenthèses du modèle français. Un texte absent reste en français.",
+ "strings": {
+  "{0} ignoré : {1}": "{0} skipped: {1}",
+  "{0} message(s) chargé(s) depuis {1}/": "{0} message(s) loaded from {1}/",
+  "{0} message(s) ajouté(s) depuis {1}": "{0} message(s) added from {1}",
+  "Aucun fichier {0}*.json dans {1}": "No {0}*.json file in {1}",
+  "TIMEOUT : pas de réponse en {0:.0f} ms à « {1} » (REQUEST ID 0x{2:02X})": "TIMEOUT: no reply within {0:.0f} ms to \"{1}\" (REQUEST ID 0x{2:02X})",
+  "Protocole : {0}": "Protocol: {0}",
+  "{0} (protocole) : {1}": "{0} (protocol): {1}",
+  "{0} ignoré : écrit pour le protocole {1}": "{0} skipped: written for protocol {1}",
+  "Protocole : {0} commande(s), {1} code(s) d'erreur": "Protocol: {0} command(s), {1} error code(s)",
+  "requête #{0}": "request #{0}",
+  "Envoi impossible : {0}": "Cannot send: {0}",
+  "Trace en cours : {0}": "Recording trace: {0}",
+  "Trace arrêtée : {0} trame(s) dans {1}": "Trace stopped: {0} frame(s) in {1}",
+  "Trace CSV": "CSV trace",
+  "Tous": "All",
+  "Trace impossible : {0}": "Cannot record trace: {0}",
+  "Manuel": "Manual",
+  "Protocole": "Protocol",
+  "Redémarrer SerialHex maintenant pour changer de langue ?": "Restart SerialHex now to change the language?",
+  "Couleurs…": "Colours…",
+  "▶ Replay": "▶ Replay",
+  "   octets non lus": "   unread bytes",
+  "TIMEOUT : pas de réponse en 500 ms": "TIMEOUT: no reply within 500 ms",
+  "SerialHex — Couleurs": "SerialHex — Colours",
+  "Aperçu": "Preview",
+  "Choisir une couleur": "Choose a colour",
+  "ligne": "line",
+  "Palette…": "Palette…",
+  "Défaut": "Default",
+  "Tout par défaut": "All defaults",
+  "Annuler": "Cancel",
+  "Appliquer": "Apply",
+  "Aucune": "None",
+  "Paire": "Even",
+  "Impaire": "Odd",
+  "Aucun": "None",
+  "Vitesse": "Baud rate",
+  "Données": "Data",
+  "Parité": "Parity",
+  "Flux": "Flow",
+  "Liaison": "Link",
+  "Connecter": "Connect",
+  "Déconnecté": "Disconnected",
+  "aucun port détecté": "no port detected",
+  "le port a disparu (câble débranché ?)": "the port disappeared (cable unplugged?)",
+  "Aucun port sélectionné": "No port selected",
+  "Dernier port utilisé : {0}": "Last port used: {0}",
+  "Connecté : {0}": "Connected: {0}",
+  "Déconnecter": "Disconnect",
+  "Réglages appliqués : {0}": "Settings applied: {0}",
+  "Série": "Serial",
+  "Adresse": "Address",
+  "(502 = Modbus TCP)": "(502 = Modbus TCP)",
+  "Actualiser": "Refresh",
+  "Connexion auto au démarrage": "Auto-connect at startup",
+  "Dernier port utilisé ({0}) absent": "Last port used ({0}) not present",
+  "connecté (utilisé par SerialHex)": "connected (used by SerialHex)",
+  "Vitesse hors limites : {0}": "Baud rate out of range: {0}",
+  "Port détecté : {0}": "Port detected: {0}",
+  "Port retiré : {0}": "Port removed: {0}",
+  "Connexion impossible : {0}": "Cannot connect: {0}",
+  "Port TCP invalide : '{0}'": "Invalid TCP port: '{0}'",
+  "Déconnecté : {0}": "Disconnected: {0}",
+  "perte de connexion — {0}": "connection lost — {0}",
+  "Connecté — {0}": "Connected — {0}",
+  "TX {0} o   RX {1} o": "TX {0} B   RX {1} B",
+  "Vitesse invalide : '{0}'": "Invalid baud rate: '{0}'",
+  "Messages": "Messages",
+  "Charger…": "Load…",
+  "Recharger": "Reload",
+  "Délai": "Delay",
+  "Envoyer la sélection": "Send selection",
+  "   CRC calculé": "   computed CRC",
+  "Calc auto CRC": "Auto CRC",
+  "   ({0} octets)": "   ({0} bytes)",
+  "● Trace": "● Trace",
+  "hexa invalide": "invalid hex",
+  "Hexa invalide (ex : AA 55 01 0D)": "Invalid hex (e.g. AA 55 01 0D)",
+  "Moniteur": "Monitor",
+  "Afficher TX": "Show TX",
+  "Défilement auto": "Auto scroll",
+  "Décoder protocole": "Decode protocol",
+  "Fin de trame après": "End of frame after",
+  "ms de silence": "ms of silence",
+  "Timeout réponse": "Reply timeout",
+  "Exporter…": "Export…",
+  "Effacer": "Clear",
+  "Hexa libre": "Free hex",
+  "Envoyer": "Send",
+  "■ Arrêter la trace": "■ Stop trace",
+  "Texte": "Text",
+  "Calc auto CRC ({0})": "Auto CRC ({0})",
+  "Sélectionne un message": "Select a message",
+  "Écrit pour : ": "Written for: ",
+  "Trame :": "Frame:",
+  "Répéter toutes les": "Repeat every",
+  "  (protocole en cours : {0})": "  (current protocol: {0})",
+  "→ Replay": "→ Replay",
+  "(aucun paramètre)": "(no parameter)",
+  "Erreur : {0}": "Error: {0}",
+  "(saisie manuelle : COMMAND ID et DATA en hexa)": "(manual entry: COMMAND ID and DATA in hex)",
+  "Auto (d'après la requête envoyée)": "Auto (from the request sent)",
+  "Brut (données non décodées)": "Raw (data not decoded)",
+  "(saisie à la main)": "(typed by hand)",
+  "Requête": "Request",
+  "Réponse": "Response",
+  "⚠ {0} (invalide)": "⚠ {0} (invalid)",
+  "Champ": "Field",
+  "Valeur": "Value",
+  "Unité": "Unit",
+  "Octets": "Bytes",
+  "requête": "request",
+  "Requête (TX)": "Request (TX)",
+  " auto": " auto",
+  "Commande": "Command",
+  "Copier": "Copy",
+  "Pas de données envoyées pour cette commande.": "No data sent for this command.",
+  "invalide": "invalid",
+  "Réponse (RX) / décodage": "Response (RX) / decoding",
+  "brut": "raw",
+  "auto": "auto",
+  "manuel": "manual",
+  "aucune commande trouvée": "no command found",
+  "Décoder": "Decode",
+  "Type de réponse": "Response type",
+  "Suivre les réponses reçues": "Follow received responses",
+  "Hexa invalide": "Invalid hex",
+  "   [type : {0}": "   [type: {0}",
+  "… {0} autre(s)": "… {0} more",
+  "Contrôle": "Check",
+  "incorrect": "wrong",
+  "erreur": "error",
+  "EN TROP": "EXTRA",
+  "{0} octet(s)": "{0} byte(s)",
+  "Octets (hexa)": "Bytes (hex)",
+  "Libellé": "Label",
+  "Résultat": "Result",
+  "Réponse reçue": "Response received",
+  "(pas une trame du protocole en cours)": "(not a frame of the current protocol)",
+  "Ligne sélectionnée": "Selected line",
+  "Décoder dans Protocole": "Decode in Protocol",
+  "Cliquer une ligne : intervalle avec les lignes voisines et décodage": "Click a line: interval with neighbouring lines and decoding",
+  "première ligne": "first line",
+  "dernière ligne": "last line",
+  "Ligne {0}": "Line {0}",
+  "t {0:.1f} ms": "t {0:.1f} ms",
+  "depuis la précédente {0:.1f} ms": "since previous {0:.1f} ms",
+  "jusqu'à la suivante {0:.1f} ms": "until next {0:.1f} ms",
+  "+ Ajouter": "+ Add",
+  "Supprimer": "Delete",
+  "Monter": "Up",
+  "Descendre": "Down",
+  "insère après": "insert after",
+  "remplace": "replace",
+  "Ouvrir…": "Open…",
+  "Nouvelle": "New",
+  "Nom": "Name",
+  "Enregistrer": "Save",
+  "Enregistrer sous…": "Save as…",
+  "Temps d'origine": "Original timing",
+  "Délai fixe": "Fixed delay",
+  "Comparer": "Compare",
+  "Aucune requête (TX) : rien à rejouer.": "No request (TX): nothing to replay.",
+  "La trace a été modifiée. Enregistrer les modifications ?": "The trace was modified. Save the changes?",
+  "replay en cours": "replay running",
+  "▶ Rejouer": "▶ Replay",
+  "donner un nom à la trace (champ Nom)": "give the trace a name (Name field)",
+  "Arrêter le replay pour modifier la trace": "Stop the replay to edit the trace",
+  "Ouvrir d'abord une trace avec au moins une ligne TX.": "First open a trace with at least one TX line.",
+  "Le port série n'est pas connecté.": "The link is not connected.",
+  "Replay arrêté": "Replay stopped",
+  "Trace enregistrée : {0}": "Trace saved: {0}",
+  "Ligne {0} : {1}": "Line {0}: {1}",
+  "Replay : {0}, {1} requête(s)": "Replay: {0}, {1} request(s)",
+  "nouvelle trace": "new trace",
+  "Replay {0} / {1}": "Replay {0} / {1}",
+  "+ Replay": "+ Replay",
+  "Enregistre les trames du moniteur : en trace CSV (.csv), rejouable dans le panneau Replay (Ouvrir…), ou en texte (.txt), tel qu'affiché": "Saves the monitor frames: as a CSV trace (.csv), replayable in the Replay panel (Open…), or as text (.txt), as displayed",
+  "Vide le moniteur (et les trames gardées pour Sauvegarder… et + Replay)": "Clears the monitor (and the frames kept for Save… and + Replay)",
+  "Copie les trames du moniteur (TX et RX, avec leurs temps) dans le panneau Replay, comme une nouvelle trace à rejouer. Sans trame : affiche le panneau": "Copies the monitor frames (TX and RX, with their times) into the Replay panel, as a new trace to replay. Without frames: shows the panel",
+  "Enregistre au fil de l'eau chaque trame TX / RX dans un fichier de trace CSV ; à l'arrêt, la trace s'ouvre dans le panneau Replay": "Records every TX / RX frame live into a CSV trace file; when stopped, the trace opens in the Replay panel",
+  "Trace CSV (rejouable)": "CSV trace (replayable)",
+  "{0} trame(s) sauvegardée(s) dans {1} : à ouvrir dans le panneau Replay": "{0} frame(s) saved in {1}: open it in the Replay panel",
+  "Journal sauvegardé : {0}": "Log saved: {0}",
+  "Pas à pas : envoie la requête de la ligne sélectionnée (ou la première), puis une requête par clic sur « ⏭ Suivant » (ou F8)": "Step by step: sends the request of the selected row (or the first one), then one request per click on \"⏭ Next\" (or F8)",
+  "Rejoue toute la trace au rythme choisi (temps d'origine ou délai fixe) et compare les réponses": "Replays the whole trace at the chosen pace (original times or fixed delay) and compares the responses",
+  "Arrête le replay ou le pas à pas": "Stops the replay or the step-by-step mode",
+  "{0} trame(s) du moniteur : ▶ Rejouer ou ⏭ Pas à pas, Enregistrer pour garder la trace": "{0} frame(s) from the monitor: ▶ Replay or ⏭ Step by step, Save to keep the trace",
+  "Ajoute une ligne TX après la sélection, « Délai fixe » ms après la ligne du dessus (les lignes suivantes sont décalées d'autant)": "Adds a TX row after the selection, \"Fixed delay\" ms after the row above (the next rows are shifted by as much)",
+  "⏭ Pas à pas": "⏭ Step by step",
+  "⏭ Suivant": "⏭ Next",
+  "Replay pas à pas : {0}, requête {1} / {2}": "Step-by-step replay: {0}, request {1} / {2}",
+  "Pas à pas {0} / {1}": "Step {0} / {1}",
+  " : ⏭ Suivant (F8) pour la requête suivante": ": ⏭ Next (F8) for the next request",
+  " : dernière requête": ": last request",
+  "Replay terminé : {0}": "Replay finished: {0}",
+  "■ Arrêter": "■ Stop",
+  "{0} requête(s), environ {1:.1f} s": "{0} request(s), about {1:.1f} s",
+  "Trace illisible :\n{0}": "Unreadable trace:\n{0}",
+  "Enregistrement impossible :\n{0}": "Cannot save:\n{0}",
+  "{0} existe déjà.\nLe remplacer ?": "{0} already exists.\nReplace it?",
+  "terminé": "finished",
+  "Replay arrêté : envoi impossible": "Replay stopped: cannot send",
+  "Moniteur et replay": "Monitor and replay",
+  "Champs des trames": "Frame fields",
+  "Trames envoyées (TX)": "Sent frames (TX)",
+  "Trames reçues (RX)": "Received frames (RX)",
+  "Informations": "Information",
+  "Erreurs": "Errors",
+  "Commande « cmd » (vide : couleur de la ligne, en gras)": "Command \"cmd\" (empty: line colour, bold)",
+  "CRC / checksum « crc »": "CRC / checksum \"crc\"",
+  "Octets non lus « na »": "Unread bytes \"na\"",
+  "CRC ou octet fixe faux": "Wrong CRC or fixed byte",
+  "Fond du code d'erreur = 0": "Error code background = 0",
+  "Fond du code d'erreur non nul": "Error code background non-zero",
+  "réponse": "response",
+  "CRC OK": "CRC OK",
+  "OK": "OK",
+  "libre": "free",
+  "occupé": "busy",
+  "absent": "missing",
+  "déjà utilisé par un autre programme": "already used by another program",
+  "introuvable (débranché ?)": "not found (unplugged?)",
+  "port non connecté": "port not connected",
+  "non connecté": "not connected",
+  "délai d'écriture dépassé (contrôle de flux bloquant ?)": "write timeout (blocking flow control?)",
+  "erreur de lecture": "read error",
+  "pas de réponse (adresse ou réseau ?)": "no answer (address or network?)",
+  "connexion refusée (port fermé ou serveur arrêté)": "connection refused (port closed or server stopped)",
+  "adresse introuvable": "address not found",
+  "connexion fermée par l'appareil": "connection closed by the device",
+  "déconnecter avant de changer de liaison": "disconnect before changing the link",
+  "caractères hexa ASCII invalides": "invalid ASCII hex characters",
+  "identique": "identical",
+  "différent": "different",
+  "sans réponse": "no reply",
+  "réponse en trop": "unexpected reply",
+  "aucune attendue": "none expected",
+  "timeout": "timeout",
+  "aucun": "none",
+  "1 (vrai)": "1 (true)",
+  "0 (faux)": "0 (false)",
+  "le fichier doit contenir un objet JSON": "the file must contain a JSON object",
+  "byte_order doit valoir little ou big": "byte_order must be little or big",
+  "bit_order doit valoir msb ou lsb": "bit_order must be msb or lsb",
+  "encoding : type inconnu (binary ou ascii_hex)": "encoding: unknown type (binary or ascii_hex)",
+  "chaque commande doit avoir 'name' et 'id'": "each command must have 'name' and 'id'",
+  "chaque message doit avoir 'name' et 'frame'": "each message must have 'name' and 'frame'",
+  "chaque preset doit avoir 'name' et 'values'": "each preset must have 'name' and 'values'",
+  "format JSON non reconnu": "unrecognised JSON format",
+  "donner un nom à la trace avant de l'enregistrer": "give the trace a name before saving it",
+  "disponible": "available",
+  "Langue": "Language",
+  "Protocole : {0} ; protocole générique intégré utilisé": "Protocol: {0}; built-in generic protocol used",
+  "aucun fichier dans protocols/": "no file in protocols/",
+  "   « requête #0x05 · Lire l'état »": "   « request #0x05 · Read state »",
+  "   => état = marche (1)": "   => state = on (1)",
+  "   CRC faux, erreur 2": "   wrong CRC, error 2",
+  "Protocole : Modbus RTU (modbus_rtu.json)": "Protocol: Modbus RTU (modbus_rtu.json)",
+  "En-tête « hdr » (octets fixes, adresse, numéro de requête)": "Header \"hdr\" (fixed bytes, address, request number)",
+  "Pas de message pour l'onglet Manuel dans {0}/ (commandes du protocole seulement)": "No message for the Manual tab in {0}/ (protocol commands only)",
+  "Masquées": "Hidden",
+  "Masquées ({0})": "Hidden ({0})",
+  "Protocole : {0} commande(s) masquée(s), visibles avec la case « Masquées »": "Protocol: {0} hidden command(s), shown with the \"Hidden\" box",
+  "{0} fichier(s) de commandes ignoré(s) : écrits pour d'autres protocoles": "{0} command file(s) skipped: written for other protocols",
+  "défaut {0}": "default {0}",
+  "invalide : {0}": "invalid: {0}",
+  "Aucun adaptateur {0} branché (décocher « {0} » pour voir tous les ports)": "No {0} adapter plugged in (untick \"{0}\" to see every port)",
+  "Sauvegarder…": "Save…",
+  "Sauvegarder le message": "Save the message",
+  "Nom du message (onglet Manuel) :": "Message name (Manual tab):",
+  "Sauvegarde impossible : {0}": "Cannot save: {0}",
+  "Message « {0} » remplacé dans {1}": "Message \"{0}\" replaced in {1}",
+  "Message « {0} » sauvegardé dans {1}": "Message \"{0}\" saved in {1}",
+  "auto req_id : REQUEST ID +1 après chaque envoi réussi (0xFF → 0x00)": "auto req_id: REQUEST ID +1 after each successful send (0xFF → 0x00)",
+  " ; {0} message(s) identique(s) déjà présent(s), ignoré(s)": "; {0} identical message(s) already present, skipped",
+  "DATA : hexa invalide": "DATA: invalid hex",
+  "{0} : {1} octet(s) attendu(s)": "{0}: {1} byte(s) expected",
+  "DATA brute saisie : les champs montrent son décodage ; vider DATA = valeurs des champs": "Raw DATA entered: the fields show its decoding; clear DATA = back to field values",
+  "Le message « {0} » existe déjà dans {1}.\n\nOui : le remplacer\nNon : garder les deux (le nouveau devient « {2} »)\nAnnuler : ne rien sauvegarder": "Message \"{0}\" already exists in {1}.\n\nYes: replace it\nNo: keep both (the new one becomes \"{2}\")\nCancel: save nothing",
+  "Message déjà présent": "Message already present",
+  "Message « {0} » déjà présent, identique, dans {1}": "Message \"{0}\" already present, identical, in {1}",
+  "Modifiable en hexa (comme le champ Données)": "Editable in hex (like the Data field)",
+  "Octets des champs ci-dessous ; modifiable en hexa (DATA brute)": "Bytes of the fields below; editable in hex (raw DATA)",
+  "Sauvegarder le message dans…": "Save the message to…",
+  "{0} déjà chargé : ignoré": "{0} already loaded: skipped",
+  " et {0} fichier(s) ajouté(s)": " and {0} added file(s)",
+  "Fichier du dossier {0}/ : toujours affiché (Retirer ne concerne que les fichiers ajoutés)": "File from the {0}/ folder: always shown (Remove only applies to added files)",
+  "{0} retiré de la liste": "{0} removed from the list",
+  "{0} introuvable : retiré de la liste": "{0} not found: removed from the list",
+  "Retirer": "Remove",
+  "Fichier proposé :": "Suggested file:",
+  " → DATA LENGTH = {0}": " → DATA LENGTH = {0}",
+  "CMD TX": "TX CMD",
+  "(aucune commande)": "(no command)",
+  "Envoie la requête (Get), comme le bouton Envoyer en bas": "Sends the request (Get), like the Send button at the bottom",
+  "DATA de {0} octet(s) : ne correspond pas aux champs": "DATA of {0} byte(s): does not match the fields",
+  "DATA de {0} octet(s), {1} attendu(s)": "DATA of {0} byte(s), {1} expected",
+  "Entier (DATA)": "Integer (DATA)",
+  "Hexa": "Hex",
+  "conversion : {0}": "conversion: {0}",
+  "entier non signé, ordre du protocole ; recalculé sur le nombre d'octets de DATA": "unsigned integer, protocol byte order; recomputed over the number of DATA bytes",
+  "pas de conversion (COMMAND ID inconnu du protocole en cours) : DATA lue comme un entier": "no conversion (COMMAND ID unknown to the current protocol): DATA read as an integer",
+  "pas de conversion pour « {0} » (pas de DATA décrite) : DATA lue comme un entier": "no conversion for \"{0}\" (no DATA described): DATA read as an integer",
+  "Données prédéfinies…": "Predefined data…",
+  "(non décrite)": "(not described)",
+  "Favoris": "Favourites",
+  "Taper pour chercher (nom, catégorie, COMMAND ID : « consigne », « READ », « 0x1E ») : les propositions s'ouvrent ; ↑ ↓ puis Entrée, ou clic": "Type to search (name, category, COMMAND ID: \"setpoint\", \"READ\", \"0x1E\"): suggestions open; ↑ ↓ then Enter, or click",
+  "cliquer une ligne bleue du tableau (DATA ou ses champs) pour la modifier ici": "click a blue row of the table (DATA or its fields) to edit it here",
+  "les champs ci-dessus montrent son décodage": "the fields above show its decoding",
+  "max {0}": "max {0}",
+  "min {0}": "min {0}",
+  "{0} octet(s) ; DATA brute en hexa": "{0} byte(s); raw DATA in hex"
+ },
+ "patterns": [
+  {
+   "fr": "^requête( #.+)$",
+   "en": "request{1}"
+  },
+  {
+   "fr": "^réponse( #.+)$",
+   "en": "response{1}"
+  },
+  {
+   "fr": "^erreur (\\d+) \\((.+)\\)$",
+   "en": "error {1} ({2})"
+  },
+  {
+   "fr": "^erreur (\\d+)$",
+   "en": "error {1}"
+  },
+  {
+   "fr": "^(\\d+) o$",
+   "en": "{1} B"
+  },
+  {
+   "fr": "^(.+) incorrect$",
+   "en": "{1} wrong"
+  },
+  {
+   "fr": "^(.+) différent de (.+)$",
+   "en": "{1} differs from {2}"
+  },
+  {
+   "fr": "^trame tronquée : (.+) incomplet$",
+   "en": "truncated frame: {1} incomplete"
+  },
+  {
+   "fr": "^données tronquées : (\\d+) octets sur (\\d+)$",
+   "en": "truncated data: {1} bytes out of {2}"
+  },
+  {
+   "fr": "^attendu (.+) \\(comme (.+)\\)$",
+   "en": "expected {1} (same as {2})"
+  },
+  {
+   "fr": "^attendu (.+)$",
+   "en": "expected {1}"
+  },
+  {
+   "fr": "^(\\d+) octet\\(s\\) en trop$",
+   "en": "{1} extra byte(s)"
+  },
+  {
+   "fr": "^début de trame (.+) absent$",
+   "en": "frame start {1} missing"
+  },
+  {
+   "fr": "^fin de trame (.+) absente$",
+   "en": "frame end {1} missing"
+  },
+  {
+   "fr": "^(.+) : (\\d+) octet\\(s\\) attendus, (\\d+) fournis$",
+   "en": "{1}: {2} byte(s) expected, {3} given"
+  },
+  {
+   "fr": "^(.+) : (.+) hors limites \\(0 à (.+)\\)$",
+   "en": "{1}: {2} out of range (0 to {3})"
+  },
+  {
+   "fr": "^données attendues \\((\\d+) champ\\(s\\)\\) mais pas de DATA$",
+   "en": "data expected ({1} field(s)) but no DATA"
+  },
+  {
+   "fr": "^(.+) \\(inconnu\\)$",
+   "en": "{1} (unknown)"
+  },
+  {
+   "fr": "^(0x[0-9A-F]+) : aucun$",
+   "en": "{1} : none"
+  },
+  {
+   "fr": "^(.+) \\(BCD invalide\\)$",
+   "en": "{1} (invalid BCD)"
+  },
+  {
+   "fr": "^DATA trop courte pour '(.+)'$",
+   "en": "DATA too short for '{1}'"
+  },
+  {
+   "fr": "^(\\d+) octet\\(s\\) de DATA non décrits$",
+   "en": "{1} DATA byte(s) not described"
+  },
+  {
+   "fr": "^'(.+)' n'est pas un nombre$",
+   "en": "'{1}' is not a number"
+  },
+  {
+   "fr": "^(.+) < min \\((.+)\\)$",
+   "en": "{1} < min ({2})"
+  },
+  {
+   "fr": "^(.+) > max \\((.+)\\)$",
+   "en": "{1} > max ({2})"
+  },
+  {
+   "fr": "^(.+) hors limites du type (.+?) \\((.+) à (.+)\\)$",
+   "en": "{1} out of range for type {2} ({3} to {4})"
+  },
+  {
+   "fr": "^(\\d+) octet\\(s\\) attendu\\(s\\), (\\d+) saisi\\(s\\)$",
+   "en": "{1} byte(s) expected, {2} entered"
+  },
+  {
+   "fr": "^(\\d+) valeurs attendues, (\\d+) saisie\\(s\\)$",
+   "en": "{1} values expected, {2} entered"
+  },
+  {
+   "fr": "^type inconnu '(.+)'$",
+   "en": "unknown type '{1}'"
+  },
+  {
+   "fr": "^(.+) : hexa invalide$",
+   "en": "{1}: invalid hex"
+  },
+  {
+   "fr": "^(.+) : type inconnu '(.+)'$",
+   "en": "{1}: unknown type '{2}'"
+  },
+  {
+   "fr": "^paramètre '(.+)' non défini$",
+   "en": "parameter '{1}' not defined"
+  },
+  {
+   "fr": "^(\\S+) déjà utilisé par un autre programme$",
+   "en": "{1} already used by another program"
+  },
+  {
+   "fr": "^(\\S+) introuvable \\(débranché \\?\\)$",
+   "en": "{1} not found (unplugged?)"
+  },
+  {
+   "fr": "^(\\S+:\\d+) (.+)$",
+   "en": "{1} {2}"
+  },
+  {
+   "fr": "^réglage refusé par le port : (.+)$",
+   "en": "setting refused by the port: {1}"
+  },
+  {
+   "fr": "^écriture impossible : (.+)$",
+   "en": "cannot write: {1}"
+  },
+  {
+   "fr": "^envoi impossible : (.+)$",
+   "en": "cannot send: {1}"
+  },
+  {
+   "fr": "^liaison inconnue : (.+)$",
+   "en": "unknown link: {1}"
+  },
+  {
+   "fr": "^aucune réponse en (\\d+) ms(.*)$",
+   "en": "no reply within {1} ms{2}"
+  },
+  {
+   "fr": "^ \\(réponse arrivée après (\\d+) ms\\)$",
+   "en": " (reply arrived after {1} ms)"
+  },
+  {
+   "fr": "^(\\d+) trame\\(s\\) attendue\\(s\\), (\\d+) reçue\\(s\\)$",
+   "en": "{1} frame(s) expected, {2} received"
+  },
+  {
+   "fr": "^(\\d+) trame\\(s\\) attendue\\(s\\)$",
+   "en": "{1} frame(s) expected"
+  },
+  {
+   "fr": "^(\\d+) trame\\(s\\) reçue\\(s\\), aucune enregistrée$",
+   "en": "{1} frame(s) received, none recorded"
+  },
+  {
+   "fr": "^(\\d+) trame\\(s\\) après le timeout ignorée\\(s\\)$",
+   "en": "{1} frame(s) after the timeout ignored"
+  },
+  {
+   "fr": "^longueur : attendu (\\d+), reçu (\\d+)$",
+   "en": "length: expected {1}, received {2}"
+  },
+  {
+   "fr": "^(octets? [\\d-]+) : attendu (.+), reçu (.+)$",
+   "en": "{1}: expected {2}, received {3}"
+  },
+  {
+   "fr": "^trame (\\d+) : (.+)$",
+   "en": "frame {1}: {2}"
+  },
+  {
+   "fr": "^… (\\d+) autre\\(s\\) écart\\(s\\)$",
+   "en": "… {1} more difference(s)"
+  },
+  {
+   "fr": "^(\\d+) (identique|différent|timeout|sans réponse|réponse en trop|aucune attendue)$",
+   "en": "{1} {2}"
+  },
+  {
+   "fr": "^(.+) : JSON invalide \\(ligne (\\d+)\\) : (.+)$",
+   "en": "{1}: invalid JSON (line {2}): {3}"
+  },
+  {
+   "fr": "^COMMAND ID (0x[0-9A-F]+) déjà utilisé par '(.+)' \\(.+\\)$",
+   "en": "COMMAND ID {1} already used by '{2}' (different \"match\", \"header\" or \"variant\" needed to tell them apart)"
+  },
+  {
+   "fr": "^commande '(.+)' : (.+)$",
+   "en": "command '{1}': {2}"
+  },
+  {
+   "fr": "^message '(.+)' : (.+)$",
+   "en": "message '{1}': {2}"
+  },
+  {
+   "fr": "^preset '(.+)' : champ\\(s\\) inconnu\\(s\\) (.+)$",
+   "en": "preset '{1}': unknown field(s) {2}"
+  },
+  {
+   "fr": "^preset '(.+)' : (.+)$",
+   "en": "preset '{1}': {2}"
+  },
+  {
+   "fr": "^match : champ '(.+)' absent de tx$",
+   "en": "match: field '{1}' not in tx"
+  },
+  {
+   "fr": "^match '(.+)' : (.+)$",
+   "en": "match '{1}': {2}"
+  },
+  {
+   "fr": "^(tx|rx)\\.(.+) : (.+)$",
+   "en": "{1}.{2}: {3}"
+  },
+  {
+   "fr": "^(tx|rx) : champ '(.+)' en double$",
+   "en": "{1}: duplicate field '{2}'"
+  },
+  {
+   "fr": "^(tx|rx) : un champ n'a pas de 'name'$",
+   "en": "{1}: a field has no 'name'"
+  },
+  {
+   "fr": "^'choices' manquant$",
+   "en": "'choices' missing"
+  },
+  {
+   "fr": "^taille variable autorisée seulement pour le dernier champ$",
+   "en": "variable size allowed only for the last field"
+  },
+  {
+   "fr": "^factor ne peut pas valoir 0$",
+   "en": "factor cannot be 0"
+  },
+  {
+   "fr": "^(\\S+\\.json) : (.+)$",
+   "en": "{1}: {2}"
+  },
+  {
+   "fr": "^(tx|rx)( \\[[^\\]]+\\])? : champ '(.+?)' : (.+)$",
+   "en": "{1}{2}: field '{3}': {4}"
+  },
+  {
+   "fr": "^(tx|rx)( \\[[^\\]]+\\])? : (.+)$",
+   "en": "{1}{2}: {3}"
+  },
+  {
+   "fr": "^\\\"(tx|rx)\\\" : liste de champs attendue$",
+   "en": "\"{1}\": list of fields expected"
+  },
+  {
+   "fr": "^\\\"(tx|rx)( \\[[^\\]]+\\])?\\\" : liste de champs attendue$",
+   "en": "\"{1}{2}\": list of fields expected"
+  },
+  {
+   "fr": "^\\\"(tx|rx)\\\" : variantes en double : (.+)$",
+   "en": "\"{1}\": duplicate variants: {2}"
+  },
+  {
+   "fr": "^\\\"(tx|rx)\\\" : chaque variante doit avoir un \\\"name\\\"$",
+   "en": "\"{1}\": each variant must have a \"name\""
+  },
+  {
+   "fr": "^\\\"(tx|rx)\\\" : variants doit être une liste de formats de trame$",
+   "en": "\"{1}\": variants must be a list of frame formats"
+  },
+  {
+   "fr": "^noms en double : (.+)$",
+   "en": "duplicate names: {1}"
+  },
+  {
+   "fr": "^un seul champ de rôle '(.+)'$",
+   "en": "only one field with role '{1}'"
+  },
+  {
+   "fr": "^rôle '(.+)' inconnu \\((.+)\\)$",
+   "en": "unknown role '{1}' ({2})"
+  },
+  {
+   "fr": "^couleur '(.+)' inconnue \\(hdr, cmd, crc, na ou #RRGGBB\\)$",
+   "en": "unknown colour '{1}' (hdr, cmd, crc, na or #RRGGBB)"
+  },
+  {
+   "fr": "^(of|over|after|same_as) désigne un champ inconnu '(.+)'$",
+   "en": "{1} refers to an unknown field '{2}'"
+  },
+  {
+   "fr": "^\\\"if\\\" désigne un champ inconnu '(.+)'$",
+   "en": "\"if\" refers to an unknown field '{1}'"
+  },
+  {
+   "fr": "^doit commencer sur un octet entier \\(il commence au bit (\\d+) d'un octet\\)$",
+   "en": "must start on a whole byte (it starts at bit {1} of a byte)"
+  },
+  {
+   "fr": "^la trame ne finit pas sur un octet entier \\(il manque (\\d+) bit\\(s\\)\\)$",
+   "en": "the frame does not end on a whole byte ({1} bit(s) missing)"
+  },
+  {
+   "fr": "^les champs comptés par of doivent faire ensemble des octets entiers \\((\\d+) bits\\)$",
+   "en": "the fields counted by of must add up to whole bytes ({1} bits)"
+  },
+  {
+   "fr": "^un champ conditionnel \\(if\\) doit faire un nombre entier d'octets$",
+   "en": "a conditional field (if) must be a whole number of bytes"
+  },
+  {
+   "fr": "^le champ recopié '(.+)' doit le précéder$",
+   "en": "the copied field '{1}' must come before it"
+  },
+  {
+   "fr": "^le champ recopié '(.+)' doit être numérique$",
+   "en": "the copied field '{1}' must be numeric"
+  },
+  {
+   "fr": "^\\\"same_as\\\" manquant \\(champ recopié\\)$",
+   "en": "\"same_as\" missing (copied field)"
+  },
+  {
+   "fr": "^après une DATA de taille variable, les champs doivent avoir une taille fixe$",
+   "en": "after a variable size DATA, fields must have a fixed size"
+  },
+  {
+   "fr": "^la longueur '(.+)' doit précéder le champ '(.+)'$",
+   "en": "the length '{1}' must come before field '{2}'"
+  },
+  {
+   "fr": "^size doit valoir 0 à (\\d+) octets \\((\\d+) bits\\)$",
+   "en": "size must be 0 to {1} bytes ({2} bits)"
+  },
+  {
+   "fr": "^une seule taille \\((.+)\\)$",
+   "en": "only one size ({1})"
+  },
+  {
+   "fr": "^une seule position \\((.+)\\)$",
+   "en": "only one position ({1})"
+  },
+  {
+   "fr": "^order doit valoir little ou big$",
+   "en": "order must be little or big"
+  },
+  {
+   "fr": "^value ne tient pas sur (.+)$",
+   "en": "value does not fit in {1}"
+  },
+  {
+   "fr": "^values doit être un objet \\{valeur: texte\\}$",
+   "en": "values must be an object {value: text}"
+  },
+  {
+   "fr": "^crc '(.+)' : '(.+)' inconnu \\(connus : (.+)\\)$",
+   "en": "crc '{1}': unknown '{2}' (known: {3})"
+  },
+  {
+   "fr": "^crc '(.+)' : width doit valoir 8, 16 ou 32$",
+   "en": "crc '{1}': width must be 8, 16 or 32"
+  },
+  {
+   "fr": "^(.+) : entier attendu, pas '(.+)'$",
+   "en": "{1}: integer expected, not '{2}'"
+  },
+  {
+   "fr": "^(.+) : entier attendu$",
+   "en": "{1}: integer expected"
+  },
+  {
+   "fr": "^variante de trame inconnue : (.+)$",
+   "en": "unknown frame variant: {1}"
+  },
+  {
+   "fr": "^placement circulaire \\(after\\) : (.+)$",
+   "en": "circular placement (after): {1}"
+  }
+ ]
+}

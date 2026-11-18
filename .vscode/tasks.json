@@ -1,0 +1,79 @@
+{
+  // Tâches : Ctrl+Shift+P > « Tâches : Exécuter la tâche », ou Ctrl+Shift+B pour la tâche par défaut.
+  "version": "2.0.0",
+  "tasks": [
+    {
+      // Ctrl+Shift+B : lance l'interface, messages et erreurs Python visibles dans le terminal
+      "label": "SerialHex : lancer",
+      "type": "process",
+      "command": "${workspaceFolder}/.venv/Scripts/python.exe",
+      "linux": { "command": "${workspaceFolder}/.venv/bin/python" },
+      "osx": { "command": "${workspaceFolder}/.venv/bin/python" },
+      "args": ["serialhex.py"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": { "kind": "build", "isDefault": true },
+      "presentation": { "reveal": "silent", "panel": "dedicated" },
+      "problemMatcher": []
+    },
+    {
+      // Comme un double-clic sur run.bat : sans console, l'interface reste ouverte après VS Code
+      "label": "SerialHex : lancer via run.bat",
+      "type": "shell",
+      "command": "${workspaceFolder}/run.bat",
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "never" },
+      "problemMatcher": []
+    },
+    {
+      // Crée ou met à jour .venv (Python 3.9 par défaut) : à faire une fois, ou après changement de requirements.txt
+      "label": "Environnement : préparer .venv (setup.ps1)",
+      "type": "shell",
+      "command": "powershell",
+      "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}/setup.ps1"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Tests : Python",
+      "type": "process",
+      "command": "${workspaceFolder}/.venv/Scripts/python.exe",
+      "linux": { "command": "${workspaceFolder}/.venv/bin/python" },
+      "osx": { "command": "${workspaceFolder}/.venv/bin/python" },
+      "args": ["-m", "unittest", "discover", "tests", "-v"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      // Paquet TypeScript (js/) : nécessite Node.js et un « npm install » dans js/
+      "label": "Tests : TypeScript (js/)",
+      "type": "shell",
+      "command": "npm test",
+      "options": { "cwd": "${workspaceFolder}/js" },
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      // Après une modification de core/frames.py : régénère tests/vectors.json
+      "label": "Tests : régénérer les vecteurs",
+      "type": "process",
+      "command": "${workspaceFolder}/.venv/Scripts/python.exe",
+      "linux": { "command": "${workspaceFolder}/.venv/bin/python" },
+      "osx": { "command": "${workspaceFolder}/.venv/bin/python" },
+      "args": ["tools/gen_test_vectors.py"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Messages : fusionner (--merge)",
+      "type": "process",
+      "command": "${workspaceFolder}/.venv/Scripts/python.exe",
+      "linux": { "command": "${workspaceFolder}/.venv/bin/python" },
+      "osx": { "command": "${workspaceFolder}/.venv/bin/python" },
+      "args": ["serialhex.py", "--merge"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    }
+  ]
+}

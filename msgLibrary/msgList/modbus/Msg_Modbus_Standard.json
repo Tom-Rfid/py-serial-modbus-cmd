@@ -1,0 +1,415 @@
+// =============================================================================================
+//  Fonctions Modbus STANDARD (Modbus Application Protocol V1.1b3), pour tout appareil.
+//  STANDARD Modbus functions (Modbus Application Protocol V1.1b3), for any device.
+// ---------------------------------------------------------------------------------------------
+//  Utilisé par modbus_rtu.json, modbus_ascii.json et modbus_tcp.json (même PDU Modbus).
+//  Used by modbus_rtu.json, modbus_ascii.json and modbus_tcp.json (same Modbus PDU).
+//
+//  COMMAND ID = code fonction ; DATA = le reste du PDU, octets de poids fort en premier.
+//  COMMAND ID = function code; DATA = the rest of the PDU, most significant byte first.
+//
+//  Commandes GÉNÉRIQUES (sans "match") : elles servent pour n'importe quel registre. Un fichier
+//  d'appareil (ex. Msg_Regulateur_Exemple.json) peut décrire en plus un registre précis avec
+//  "match" : au décodage, la commande précise passe avant la générique.
+//  GENERIC commands (no "match"): they work for any register. A device file (e.g.
+//  Msg_Regulateur_Exemple.json) can also describe a specific register with "match": when
+//  decoding, the specific command wins over the generic one.
+//
+//  Données de longueur variable (valeurs lues, valeurs à écrire) : type "raw" (hexa).
+//  Variable-length data (values read, values to write): "raw" type (hex).
+//
+//  Fonctions « ligne série seulement » : 07, 08, 0B, 0C, 11 (non définies en Modbus TCP).
+//  "Serial line only" functions: 07, 08, 0B, 0C, 11 (not defined for Modbus TCP).
+//
+//  Clés d'un champ : LISEZMOI_CONF.txt, partie « Fichiers de commandes ».
+// =============================================================================================
+{
+  "protocol": ["Modbus RTU", "Modbus ASCII", "Modbus TCP"],
+  "commands": [
+
+    // --- 01 : lecture de bobines / read coils ---------------------------------------------
+    {
+      "name": "01 Lire bobines",
+      "name_en": "01 Read coils",
+      "id": "0x01",
+      "group": "READ",
+      "description": "Lit 1 à 2000 bobines (sorties tout-ou-rien) à partir d'une adresse. Réponse : 1 bit par bobine, bit 0 = première bobine.",
+      "description_en": "Reads 1 to 2000 coils (digital outputs) from a start address. Response: 1 bit per coil, bit 0 = first coil.",
+      "attributes": {"access": "R"},
+      "tx": [
+        {"name": "address", "label": "Adresse de départ", "label_en": "Start address", "type": "uint16", "default": "0x0000"},
+        {"name": "quantity", "label": "Nombre de bobines", "label_en": "Quantity of coils", "type": "uint16", "default": 8, "min": 1, "max": 2000}
+      ],
+      "rx": [
+        {"name": "bytes", "label": "Nombre d'octets", "label_en": "Byte count", "type": "uint8"},
+        {"name": "status", "label": "États des bobines", "label_en": "Coil status", "type": "raw"}
+      ]
+    },
+
+    // --- 02 : lecture d'entrées TOR / read discrete inputs ---------------------------------
+    {
+      "name": "02 Lire entrées TOR",
+      "name_en": "02 Read discrete inputs",
+      "id": "0x02",
+      "group": "READ",
+      "description": "Lit 1 à 2000 entrées tout-ou-rien. Réponse : 1 bit par entrée, bit 0 = première entrée.",
+      "description_en": "Reads 1 to 2000 discrete inputs. Response: 1 bit per input, bit 0 = first input.",
+      "attributes": {"access": "R"},
+      "tx": [
+        {"name": "address", "label": "Adresse de départ", "label_en": "Start address", "type": "uint16", "default": "0x0000"},
+        {"name": "quantity", "label": "Nombre d'entrées", "label_en": "Quantity of inputs", "type": "uint16", "default": 8, "min": 1, "max": 2000}
+      ],
+      "rx": [
+        {"name": "bytes", "label": "Nombre d'octets", "label_en": "Byte count", "type": "uint8"},
+        {"name": "status", "label": "États des entrées", "label_en": "Input status", "type": "raw"}
+      ]
+    },
+
+    // --- 03 : lecture de registres de maintien / read holding registers --------------------
+    {
+      "name": "03 Lire registres de maintien",
+      "name_en": "03 Read holding registers",
+      "id": "0x03",
+      "group": "READ",
+      "description": "Lit 1 à 125 registres de 16 bits (lecture / écriture). Réponse : 2 octets par registre, poids fort en premier.",
+      "description_en": "Reads 1 to 125 16-bit registers (read / write). Response: 2 bytes per register, high byte first.",
+      "attributes": {"access": "R"},
+      "tx": [
+        {"name": "address", "label": "Adresse de départ", "label_en": "Start address", "type": "uint16", "default": "0x0000"},
+        {"name": "quantity", "label": "Nombre de registres", "label_en": "Quantity of registers", "type": "uint16", "default": 1, "min": 1, "max": 125}
+      ],
+      "rx": [
+        {"name": "bytes", "label": "Nombre d'octets", "label_en": "Byte count", "type": "uint8"},
+        {"name": "registers", "label": "Registres", "label_en": "Registers", "type": "raw"}
+      ],
+      "presets": [
+        {"name": "1 registre / 1 register", "values": {"quantity": 1}},
+        {"name": "10 registres / 10 registers", "values": {"quantity": 10}},
+        {"name": "125 registres (max)", "values": {"quantity": 125}}
+      ]
+    },
+
+    // --- 04 : lecture de registres d'entrée / read input registers -------------------------
+    {
+      "name": "04 Lire registres d'entrée",
+      "name_en": "04 Read input registers",
+      "id": "0x04",
+      "group": "READ",
+      "description": "Lit 1 à 125 registres d'entrée de 16 bits (lecture seule : mesures). Réponse : 2 octets par registre.",
+      "description_en": "Reads 1 to 125 16-bit input registers (read only: measurements). Response: 2 bytes per register.",
+      "attributes": {"access": "R"},
+      "tx": [
+        {"name": "address", "label": "Adresse de départ", "label_en": "Start address", "type": "uint16", "default": "0x0000"},
+        {"name": "quantity", "label": "Nombre de registres", "label_en": "Quantity of registers", "type": "uint16", "default": 1, "min": 1, "max": 125}
+      ],
+      "rx": [
+        {"name": "bytes", "label": "Nombre d'octets", "label_en": "Byte count", "type": "uint8"},
+        {"name": "registers", "label": "Registres", "label_en": "Registers", "type": "raw"}
+      ]
+    },
+
+    // --- 05 : écriture d'une bobine / write single coil ------------------------------------
+    {
+      "name": "05 Écrire une bobine",
+      "name_en": "05 Write single coil",
+      "id": "0x05",
+      "group": "WRITE",
+      "description": "Met une bobine à 1 (FF00) ou à 0 (0000). Réponse : écho de la requête.",
+      "description_en": "Sets a coil ON (FF00) or OFF (0000). Response: echo of the request.",
+      "attributes": {"access": "W"},
+      "tx": [
+        {"name": "address", "label": "Adresse", "label_en": "Address", "type": "uint16", "default": "0x0000"},
+        {"name": "value", "label": "Valeur", "label_en": "Value", "type": "uint16", "choices": {"ON": "0xFF00", "OFF": "0x0000"}, "default": "ON"}
+      ],
+      "rx": [
+        {"name": "address", "label": "Adresse", "label_en": "Address", "type": "uint16"},
+        {"name": "value", "label": "Valeur", "label_en": "Value", "type": "uint16", "choices": {"ON": "0xFF00", "OFF": "0x0000"}}
+      ],
+      "presets": [
+        {"name": "ON", "values": {"value": "ON"}},
+        {"name": "OFF", "values": {"value": "OFF"}}
+      ]
+    },
+
+    // --- 06 : écriture d'un registre / write single register -------------------------------
+    {
+      "name": "06 Écrire un registre",
+      "name_en": "06 Write single register",
+      "id": "0x06",
+      "group": "WRITE",
+      "description": "Écrit un registre de maintien de 16 bits. Réponse : écho de la requête.",
+      "description_en": "Writes one 16-bit holding register. Response: echo of the request.",
+      "attributes": {"access": "W"},
+      "tx": [
+        {"name": "address", "label": "Adresse", "label_en": "Address", "type": "uint16", "default": "0x0000"},
+        {"name": "value", "label": "Valeur", "label_en": "Value", "type": "uint16", "default": 0}
+      ],
+      "rx": [
+        {"name": "address", "label": "Adresse", "label_en": "Address", "type": "uint16"},
+        {"name": "value", "label": "Valeur", "label_en": "Value", "type": "uint16"}
+      ]
+    },
+
+    // --- 07 : état d'exception / read exception status (ligne série) -----------------------
+    {
+      "name": "07 Lire état d'exception",
+      "name_en": "07 Read exception status",
+      "id": "0x07",
+      "group": "DIAG",
+      "description": "Ligne série seulement. Renvoie 8 bits d'état propres à l'appareil.",
+      "description_en": "Serial line only. Returns 8 device-specific status bits.",
+      "tx": [],
+      "rx": [
+        {"name": "status", "label": "État", "label_en": "Status", "type": "uint8"}
+      ]
+    },
+
+    // --- 08 : diagnostic / diagnostics (ligne série) ---------------------------------------
+    {
+      "name": "08 Diagnostic",
+      "name_en": "08 Diagnostics",
+      "id": "0x08",
+      "group": "DIAG",
+      "description": "Ligne série seulement. Sous-fonction 0x0000 = écho (l'esclave renvoie la donnée telle quelle, test de liaison) ; 0x000A = remise à zéro des compteurs ; 0x000B à 0x0012 = lecture des compteurs.",
+      "description_en": "Serial line only. Sub-function 0x0000 = echo (the server returns the data unchanged, link test); 0x000A = clear counters; 0x000B to 0x0012 = read counters.",
+      "tx": [
+        {"name": "sub", "label": "Sous-fonction", "label_en": "Sub-function", "type": "uint16",
+         "choices": {"écho / echo": "0x0000", "RAZ compteurs / clear counters": "0x000A",
+                     "messages bus / bus messages": "0x000B", "erreurs CRC / CRC errors": "0x000C",
+                     "exceptions": "0x000D", "messages esclave / server messages": "0x000E"},
+         "default": "écho / echo"},
+        {"name": "data", "label": "Donnée", "label_en": "Data", "type": "raw", "count": 2, "default": "A5 37"}
+      ],
+      "rx": [
+        {"name": "sub", "label": "Sous-fonction", "label_en": "Sub-function", "type": "uint16"},
+        {"name": "data", "label": "Donnée", "label_en": "Data", "type": "raw", "count": 2}
+      ],
+      "presets": [
+        {"name": "Écho A5 37 / echo", "values": {"sub": "écho / echo", "data": "A5 37"}},
+        {"name": "RAZ compteurs / clear counters", "values": {"sub": "RAZ compteurs / clear counters", "data": "00 00"}}
+      ]
+    },
+
+    // --- 0B : compteur d'événements / get comm event counter (ligne série) -----------------
+    {
+      "name": "0B Lire compteur d'événements",
+      "name_en": "0B Get comm event counter",
+      "id": "0x0B",
+      "group": "DIAG",
+      "description": "Ligne série seulement. Mot d'état (FFFF = occupé) et nombre de messages traités sans erreur.",
+      "description_en": "Serial line only. Status word (FFFF = busy) and number of messages handled without error.",
+      "tx": [],
+      "rx": [
+        {"name": "status", "label": "État", "label_en": "Status", "type": "uint16", "choices": {"prêt / ready": "0x0000", "occupé / busy": "0xFFFF"}},
+        {"name": "count", "label": "Compteur", "label_en": "Event count", "type": "uint16"}
+      ]
+    },
+
+    // --- 0C : journal d'événements / get comm event log (ligne série) ----------------------
+    {
+      "name": "0C Lire journal d'événements",
+      "name_en": "0C Get comm event log",
+      "id": "0x0C",
+      "group": "DIAG",
+      "description": "Ligne série seulement. État, compteur d'événements, compteur de messages et 0 à 64 octets d'événements (le plus récent en premier).",
+      "description_en": "Serial line only. Status, event count, message count and 0 to 64 event bytes (most recent first).",
+      "tx": [],
+      "rx": [
+        {"name": "bytes", "label": "Nombre d'octets", "label_en": "Byte count", "type": "uint8"},
+        {"name": "status", "label": "État", "label_en": "Status", "type": "uint16", "choices": {"prêt / ready": "0x0000", "occupé / busy": "0xFFFF"}},
+        {"name": "events", "label": "Compteur d'événements", "label_en": "Event count", "type": "uint16"},
+        {"name": "messages", "label": "Compteur de messages", "label_en": "Message count", "type": "uint16"},
+        {"name": "log", "label": "Événements", "label_en": "Events", "type": "raw"}
+      ]
+    },
+
+    // --- 0F : écriture de bobines / write multiple coils -----------------------------------
+    {
+      "name": "0F Écrire plusieurs bobines",
+      "name_en": "0F Write multiple coils",
+      "id": "0x0F",
+      "group": "WRITE",
+      "description": "Écrit 1 à 1968 bobines. « Nombre d'octets » = nombre de bobines / 8, arrondi au-dessus ; valeurs : 1 bit par bobine, bit 0 = première. Exemple : 10 bobines, 2 octets « CD 01 ».",
+      "description_en": "Writes 1 to 1968 coils. \"Byte count\" = number of coils / 8, rounded up; values: 1 bit per coil, bit 0 = first. Example: 10 coils, 2 bytes \"CD 01\".",
+      "attributes": {"access": "W"},
+      "tx": [
+        {"name": "address", "label": "Adresse de départ", "label_en": "Start address", "type": "uint16", "default": "0x0000"},
+        {"name": "quantity", "label": "Nombre de bobines", "label_en": "Quantity of coils", "type": "uint16", "default": 8, "min": 1, "max": 1968},
+        {"name": "bytes", "label": "Nombre d'octets", "label_en": "Byte count", "type": "uint8", "default": 1},
+        {"name": "values", "label": "Valeurs", "label_en": "Values", "type": "raw", "default": "FF"}
+      ],
+      "rx": [
+        {"name": "address", "label": "Adresse de départ", "label_en": "Start address", "type": "uint16"},
+        {"name": "quantity", "label": "Nombre de bobines", "label_en": "Quantity of coils", "type": "uint16"}
+      ]
+    },
+
+    // --- 10 : écriture de registres / write multiple registers -----------------------------
+    {
+      "name": "10 Écrire plusieurs registres",
+      "name_en": "10 Write multiple registers",
+      "id": "0x10",
+      "group": "WRITE",
+      "description": "Écrit 1 à 123 registres. « Nombre d'octets » = 2 × nombre de registres ; valeurs : 2 octets par registre, poids fort en premier. Exemple : 2 registres = 4 octets « 00 0A 01 02 ».",
+      "description_en": "Writes 1 to 123 registers. \"Byte count\" = 2 × number of registers; values: 2 bytes per register, high byte first. Example: 2 registers = 4 bytes \"00 0A 01 02\".",
+      "attributes": {"access": "W"},
+      "tx": [
+        {"name": "address", "label": "Adresse de départ", "label_en": "Start address", "type": "uint16", "default": "0x0000"},
+        {"name": "quantity", "label": "Nombre de registres", "label_en": "Quantity of registers", "type": "uint16", "default": 1, "min": 1, "max": 123},
+        {"name": "bytes", "label": "Nombre d'octets", "label_en": "Byte count", "type": "uint8", "default": 2},
+        {"name": "values", "label": "Valeurs", "label_en": "Values", "type": "raw", "default": "00 00"}
+      ],
+      "rx": [
+        {"name": "address", "label": "Adresse de départ", "label_en": "Start address", "type": "uint16"},
+        {"name": "quantity", "label": "Nombre de registres", "label_en": "Quantity of registers", "type": "uint16"}
+      ]
+    },
+
+    // --- 11 : identifiant de l'esclave / report server ID (ligne série) --------------------
+    {
+      "name": "11 Lire identifiant esclave",
+      "name_en": "11 Report server ID",
+      "id": "0x11",
+      "group": "DIAG",
+      "description": "Ligne série seulement. Identifiant, état de marche (FF = en marche) et données propres à l'appareil.",
+      "description_en": "Serial line only. Server ID, run indicator (FF = ON) and device-specific data.",
+      "tx": [],
+      "rx": [
+        {"name": "bytes", "label": "Nombre d'octets", "label_en": "Byte count", "type": "uint8"},
+        {"name": "data", "label": "Identifiant, état, données", "label_en": "Server ID, run indicator, data", "type": "raw"}
+      ]
+    },
+
+    // --- 14 : lecture d'enregistrements de fichier / read file record ----------------------
+    {
+      "name": "14 Lire enregistrement de fichier",
+      "name_en": "14 Read file record",
+      "id": "0x14",
+      "group": "READ",
+      "description": "Lit des enregistrements de fichier. Une sous-requête = type 06, n° de fichier, n° d'enregistrement, nombre de registres (7 octets). Exemple : 06 00 04 00 01 00 02.",
+      "description_en": "Reads file records. One sub-request = reference type 06, file number, record number, record length (7 bytes). Example: 06 00 04 00 01 00 02.",
+      "attributes": {"access": "R"},
+      "tx": [
+        {"name": "bytes", "label": "Nombre d'octets", "label_en": "Byte count", "type": "uint8", "default": 7},
+        {"name": "requests", "label": "Sous-requêtes", "label_en": "Sub-requests", "type": "raw", "default": "06 00 04 00 01 00 02"}
+      ],
+      "rx": [
+        {"name": "bytes", "label": "Nombre d'octets", "label_en": "Byte count", "type": "uint8"},
+        {"name": "records", "label": "Enregistrements", "label_en": "Records", "type": "raw"}
+      ]
+    },
+
+    // --- 15 : écriture d'enregistrements de fichier / write file record --------------------
+    {
+      "name": "15 Écrire enregistrement de fichier",
+      "name_en": "15 Write file record",
+      "id": "0x15",
+      "group": "WRITE",
+      "description": "Écrit des enregistrements de fichier. Une sous-requête = type 06, n° de fichier, n° d'enregistrement, nombre de registres, puis les registres. Réponse : écho de la requête.",
+      "description_en": "Writes file records. One sub-request = reference type 06, file number, record number, record length, then the registers. Response: echo of the request.",
+      "attributes": {"access": "W"},
+      "tx": [
+        {"name": "bytes", "label": "Nombre d'octets", "label_en": "Byte count", "type": "uint8", "default": 9},
+        {"name": "requests", "label": "Sous-requêtes", "label_en": "Sub-requests", "type": "raw", "default": "06 00 04 00 07 00 01 00 00"}
+      ],
+      "rx": [
+        {"name": "bytes", "label": "Nombre d'octets", "label_en": "Byte count", "type": "uint8"},
+        {"name": "requests", "label": "Sous-requêtes", "label_en": "Sub-requests", "type": "raw"}
+      ]
+    },
+
+    // --- 16 : écriture masquée d'un registre / mask write register -------------------------
+    {
+      "name": "16 Écrire registre avec masque",
+      "name_en": "16 Mask write register",
+      "id": "0x16",
+      "group": "WRITE",
+      "description": "Résultat = (valeur actuelle AND masque ET) OR (masque OU AND NOT masque ET). Permet de changer quelques bits d'un registre. Réponse : écho de la requête.",
+      "description_en": "Result = (current value AND and-mask) OR (or-mask AND NOT and-mask). Changes some bits of a register. Response: echo of the request.",
+      "attributes": {"access": "W"},
+      "tx": [
+        {"name": "address", "label": "Adresse", "label_en": "Address", "type": "uint16", "default": "0x0000"},
+        {"name": "and_mask", "label": "Masque ET", "label_en": "And mask", "type": "uint16", "default": "0xFFFF"},
+        {"name": "or_mask", "label": "Masque OU", "label_en": "Or mask", "type": "uint16", "default": "0x0000"}
+      ],
+      "rx": [
+        {"name": "address", "label": "Adresse", "label_en": "Address", "type": "uint16"},
+        {"name": "and_mask", "label": "Masque ET", "label_en": "And mask", "type": "uint16"},
+        {"name": "or_mask", "label": "Masque OU", "label_en": "Or mask", "type": "uint16"}
+      ]
+    },
+
+    // --- 17 : lecture / écriture de registres / read-write multiple registers --------------
+    {
+      "name": "17 Lire et écrire des registres",
+      "name_en": "17 Read/write multiple registers",
+      "id": "0x17",
+      "group": "WRITE",
+      "description": "Écrit 1 à 121 registres puis lit 1 à 125 registres, en une trame (l'écriture se fait avant la lecture).",
+      "description_en": "Writes 1 to 121 registers then reads 1 to 125 registers, in one frame (the write is done before the read).",
+      "attributes": {"access": "RW"},
+      "tx": [
+        {"name": "read_address", "label": "Adresse de lecture", "label_en": "Read start address", "type": "uint16", "default": "0x0000"},
+        {"name": "read_quantity", "label": "Nombre à lire", "label_en": "Quantity to read", "type": "uint16", "default": 1, "min": 1, "max": 125},
+        {"name": "write_address", "label": "Adresse d'écriture", "label_en": "Write start address", "type": "uint16", "default": "0x0000"},
+        {"name": "write_quantity", "label": "Nombre à écrire", "label_en": "Quantity to write", "type": "uint16", "default": 1, "min": 1, "max": 121},
+        {"name": "bytes", "label": "Nombre d'octets", "label_en": "Write byte count", "type": "uint8", "default": 2},
+        {"name": "values", "label": "Valeurs à écrire", "label_en": "Values to write", "type": "raw", "default": "00 00"}
+      ],
+      "rx": [
+        {"name": "bytes", "label": "Nombre d'octets", "label_en": "Byte count", "type": "uint8"},
+        {"name": "registers", "label": "Registres lus", "label_en": "Registers read", "type": "raw"}
+      ]
+    },
+
+    // --- 18 : lecture d'une file FIFO / read FIFO queue ------------------------------------
+    {
+      "name": "18 Lire file FIFO",
+      "name_en": "18 Read FIFO queue",
+      "id": "0x18",
+      "group": "READ",
+      "description": "Lit le contenu d'une file FIFO de registres (31 registres au plus).",
+      "description_en": "Reads the content of a FIFO queue of registers (31 registers at most).",
+      "attributes": {"access": "R"},
+      "tx": [
+        {"name": "address", "label": "Adresse du pointeur FIFO", "label_en": "FIFO pointer address", "type": "uint16", "default": "0x0000"}
+      ],
+      "rx": [
+        {"name": "bytes", "label": "Nombre d'octets", "label_en": "Byte count", "type": "uint16"},
+        {"name": "count", "label": "Nombre de registres", "label_en": "FIFO count", "type": "uint16", "max": 31},
+        {"name": "registers", "label": "Registres", "label_en": "Registers", "type": "raw"}
+      ]
+    },
+
+    // --- 2B / MEI 0E : identification de l'appareil / read device identification -----------
+    {
+      "name": "2B Lire identification",
+      "name_en": "2B Read device identification",
+      "id": "0x2B",
+      "group": "DIAG",
+      "description": "MEI 0x0E. Code 1 = identification de base (fabricant, produit, version), 2 = standard, 3 = étendue, 4 = un objet précis.",
+      "description_en": "MEI 0x0E. Code 1 = basic identification (vendor, product, version), 2 = regular, 3 = extended, 4 = one specific object.",
+      "tx": [
+        {"name": "mei", "label": "Type MEI", "label_en": "MEI type", "type": "uint8", "default": "0x0E", "min": 14, "max": 14},
+        {"name": "code", "label": "Code", "label_en": "Code", "type": "uint8",
+         "choices": {"base / basic": 1, "standard / regular": 2, "étendue / extended": 3, "un objet / one object": 4}, "default": 1},
+        {"name": "object", "label": "Objet", "label_en": "Object", "type": "uint8", "default": 0}
+      ],
+      "rx": [
+        {"name": "mei", "label": "Type MEI", "label_en": "MEI type", "type": "uint8"},
+        {"name": "code", "label": "Code", "label_en": "Code", "type": "uint8"},
+        {"name": "conformity", "label": "Conformité", "label_en": "Conformity", "type": "uint8"},
+        {"name": "more", "label": "Suite", "label_en": "More follows", "type": "uint8", "choices": {"non / no": 0, "oui / yes": 255}},
+        {"name": "next", "label": "Objet suivant", "label_en": "Next object", "type": "uint8"},
+        {"name": "count", "label": "Nombre d'objets", "label_en": "Number of objects", "type": "uint8"},
+        // Objets : n° (1 octet), longueur (1 octet), texte ; affichés en hexa / shown in hex
+        {"name": "objects", "label": "Objets", "label_en": "Objects", "type": "raw"}
+      ],
+      "presets": [
+        {"name": "Base / basic", "values": {"code": "base / basic"}},
+        {"name": "Standard / regular", "values": {"code": "standard / regular"}},
+        {"name": "Étendue / extended", "values": {"code": "étendue / extended"}}
+      ]
+    }
+  ]
+}

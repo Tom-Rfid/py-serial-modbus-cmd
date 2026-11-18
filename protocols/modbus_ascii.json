@@ -1,0 +1,90 @@
+// =============================================================================================
+//  Modbus ASCII  —  protocole public / public protocol
+// ---------------------------------------------------------------------------------------------
+//  FR : Même contenu que Modbus RTU (ADRESSE, FONCTION, DONNÉES) mais chaque octet est écrit
+//       en 2 caractères hexa ASCII, entre « : » et CR LF. Contrôle : LRC (somme sur 8 bits,
+//       complément à 2) au lieu du CRC16. Souvent en 7 bits, parité paire (réglage du port).
+//  EN : Same content as Modbus RTU (ADDRESS, FUNCTION, DATA) but each byte is sent as two
+//       ASCII hex characters, between ":" and CR LF. Check: LRC (8-bit sum, two's complement)
+//       instead of CRC16. Often 7 data bits, even parity (port setting).
+//
+//  Exemple / example :
+//    trame binaire / binary frame  01 03 00 00 00 0A F2
+//    sur la ligne / on the line     :01030000000AF2<CR><LF>   (3A 30 31 30 33 … 0D 0A)
+//
+//  Les champs, longueurs et LRC portent sur la trame BINAIRE ; seul le transport change.
+//  Fields, lengths and LRC apply to the BINARY frame; only the transport changes.
+//  Toutes les options : LISEZMOI_CONF.txt  /  All options: README_CONF.txt
+// =============================================================================================
+{
+  "name": "Modbus ASCII",
+  "description": "Modbus ASCII : « :ADFC…LRC CR LF », LRC sur 8 bits",
+  "description_en": "Modbus ASCII: \":ADFC…LRC CR LF\", 8-bit LRC",
+  "byte_order": "big",
+  "bit_order": "msb",
+
+  // Codage sur la ligne / line encoding
+  //   type      : "ascii_hex" = 2 caractères hexa par octet / 2 hex characters per byte
+  //   start     : caractère de début / start character
+  //   end       : fin de trame, sert aussi à découper les trames reçues / end of frame, also used
+  //               to split received frames
+  //   lowercase : false = hexa en majuscules (A-F) / upper-case hex digits
+  "encoding": {"type": "ascii_hex", "start": ":", "end": "\r\n", "lowercase": false},
+
+  "categories": {
+    "READ":  {"fr": "Lecture",    "en": "Read"},
+    "WRITE": {"fr": "Écriture",   "en": "Write"},
+    "DIAG":  {"fr": "Diagnostic", "en": "Diagnostics"}
+  },
+
+  "tx": [
+    {"name": "ADRESSE", "size": 1, "role": "request_id", "color": "hdr",
+     "description": "Adresse de l'esclave : 1 à 247 ; 0 = diffusion", "description_en": "Server address: 1 to 247; 0 = broadcast"},
+    {"name": "FONCTION", "size": 1, "role": "command_id", "color": "cmd",
+     "description": "Code fonction Modbus (voir modbus_rtu.json)", "description_en": "Modbus function code (see modbus_rtu.json)"},
+    {"name": "DATA", "role": "data"},
+    // LRC : sum8_2c = complément à 2 de la somme des octets, sur 1 octet.
+    // LRC: sum8_2c = two's complement of the byte sum, on 1 byte.
+    {"name": "LRC", "size": 1, "role": "crc", "algo": "sum8_2c", "over": ["ADRESSE", "DATA"], "color": "crc",
+     "description": "LRC : complément à 2 de la somme des octets", "description_en": "LRC: two's complement of the byte sum"}
+  ],
+
+  "rx": {
+    "variants": [
+      {
+        "name": "Normale",
+        "description": "Réponse normale", "description_en": "Normal response",
+        "fields": [
+          {"name": "ADRESSE", "size": 1, "role": "request_id", "color": "hdr"},
+          {"name": "EXCEPTION", "LENb": 1, "role": "value", "value": 0, "color": "hdr"},
+          {"name": "FONCTION", "LENb": 7, "role": "command_id", "color": "cmd"},
+          {"name": "DATA", "role": "data"},
+          {"name": "LRC", "size": 1, "role": "crc", "algo": "sum8_2c", "over": ["ADRESSE", "DATA"], "color": "crc"}
+        ]
+      },
+      {
+        "name": "Exception",
+        "description": "Fonction + 0x80, puis code d'exception", "description_en": "Function + 0x80, then exception code",
+        "fields": [
+          {"name": "ADRESSE", "size": 1, "role": "request_id", "color": "hdr"},
+          {"name": "EXCEPTION", "LENb": 1, "role": "value", "value": 1, "color": "hdr"},
+          {"name": "FONCTION", "LENb": 7, "role": "command_id", "color": "cmd"},
+          {"name": "CODE EXCEPTION", "size": 1, "role": "error"},
+          {"name": "LRC", "size": 1, "role": "crc", "algo": "sum8_2c", "over": ["ADRESSE", "CODE EXCEPTION"], "color": "crc"}
+        ]
+      }
+    ]
+  },
+
+  "errors": {
+    "0x01": {"fr": "Fonction non supportée",                "en": "Illegal function"},
+    "0x02": {"fr": "Adresse de données invalide",           "en": "Illegal data address"},
+    "0x03": {"fr": "Valeur de données invalide",            "en": "Illegal data value"},
+    "0x04": {"fr": "Défaut de l'esclave",                   "en": "Server device failure"},
+    "0x05": {"fr": "Acquittement",                          "en": "Acknowledge"},
+    "0x06": {"fr": "Esclave occupé",                        "en": "Server device busy"}
+  },
+
+  // Mêmes commandes que Modbus RTU / same commands as Modbus RTU
+  "commands": "../msgLibrary/msgList/modbus"
+}

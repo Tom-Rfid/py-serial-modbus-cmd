@@ -1,0 +1,7 @@
+{
+  // Extensions proposées à l'ouverture du dossier
+  "recommendations": [
+    "ms-python.python",
+    "ms-python.debugpy"
+  ]
+}

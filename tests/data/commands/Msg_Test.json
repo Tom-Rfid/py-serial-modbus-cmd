@@ -1,0 +1,22 @@
+// Commandes d'essai pour les tests (protocole générique intégré, appareil fictif)
+{
+  "protocol": "Exemple générique",
+  "group": "TEST",
+  "commands": [
+    {"name": "Lire l'état", "name_en": "Read state", "id": "0x0010",
+     "rx": [{"name": "état", "type": "uint8", "choices": {"arrêt": 0, "marche": 1}}]},
+    {"name": "Écrire l'état", "id": "0x8010",
+     "tx": [{"name": "état", "type": "uint8", "choices": {"arrêt": 0, "marche": 1}}],
+     "presets": [{"name": "Marche", "values": {"état": "marche"}}, {"name": "Arrêt", "values": {"état": "arrêt"}}]},
+    {"name": "Écrire l'adresse IP", "id": "0x8020",
+     "tx": [{"name": "IP", "type": "uint8", "count": 4, "format": "ip", "default": "192.168.1.10"}],
+     "presets": [{"name": "Usine", "values": {"IP": "192.168.1.100"}}]},
+    {"name": "Lire la plage", "id": "0x0030",
+     "rx": [{"name": "plage", "type": "F32[2]", "unit": "mm"}]}
+  ],
+  "errors": {
+    "0": "OK",
+    "1": {"fr": "Commande inconnue", "en": "Unknown command"},
+    "2": "Paramètre invalide"
+  }
+}

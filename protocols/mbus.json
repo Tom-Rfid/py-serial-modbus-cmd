@@ -1,0 +1,162 @@
+// =============================================================================================
+//  M-Bus (Meter-Bus, EN 13757-2 / -3)  —  protocole public / public protocol
+// ---------------------------------------------------------------------------------------------
+//  FR : Relève de compteurs (chaleur, eau, gaz, électricité) sur bus 2 fils, 2400 bauds 8E1
+//       en général. Trois formats de trame, reconnus à leur premier octet :
+//         E5                              accusé de réception (1 octet)
+//         10 C A CS 16                    trame courte (SND_NKE, REQ_UD2)
+//         68 L L 68 C A CI DATA CS 16     trame longue (SND_UD, RSP_UD), L répété
+//       CS = somme sur 8 bits de C jusqu'à la fin de DATA. Valeurs en little endian.
+//  EN : Meter reading (heat, water, gas, electricity) on a 2-wire bus, usually 2400 baud 8E1.
+//       Three frame formats, recognised by their first byte:
+//         E5                              acknowledge (1 byte)
+//         10 C A CS 16                    short frame (SND_NKE, REQ_UD2)
+//         68 L L 68 C A CI DATA CS 16     long frame (SND_UD, RSP_UD), L repeated
+//       CS = 8-bit sum from C to the end of DATA. Values are little endian.
+//
+//  Exemples / examples (adresse primaire / primary address 5) :
+//    TX 10 40 05 45 16          SND_NKE : initialisation / initialisation
+//    RX E5                      accusé / acknowledge
+//    TX 10 5B 05 60 16          REQ_UD2 : demande des données / request data
+//    RX 68 23 23 68 08 05 72 …  RSP_UD : données du compteur / meter data (voir msgLibrary/msgList/mbus/)
+//
+//  Toutes les options : LISEZMOI_CONF.txt  /  All options: README_CONF.txt
+// =============================================================================================
+{
+  "name": "M-Bus",
+  "description": "M-Bus : E5 / trame courte 10…16 / trame longue 68 L L 68…16, somme sur 8 bits",
+  "description_en": "M-Bus: E5 / short frame 10…16 / long frame 68 L L 68…16, 8-bit checksum",
+  "byte_order": "little",                        // valeurs M-Bus poids faible en premier / low byte first
+  "bit_order": "msb",
+  "encoding": "binary",
+
+  "categories": {
+    "INIT": {"fr": "Initialisation", "en": "Initialisation"},
+    "READ": {"fr": "Relève",         "en": "Readout"},
+    "SET":  {"fr": "Réglage",        "en": "Settings"}
+  },
+
+  // ------------------------------------------------------------------------------------------
+  //  REQUÊTE (maître -> compteur) : trame courte ou longue, choisie dans la liste « Format »
+  //  REQUEST (master -> meter): short or long frame, chosen in the "Format" list
+  // ------------------------------------------------------------------------------------------
+  "tx": {
+    "variants": [
+      {
+        "name": "Courte",
+        "description": "Trame courte : commande sans données (SND_NKE, REQ_UD2)",
+        "description_en": "Short frame: command without data (SND_NKE, REQ_UD2)",
+        "fields": [
+          {"name": "START", "size": 1, "role": "value", "value": "0x10", "color": "hdr",
+           "description": "Début de trame courte", "description_en": "Short frame start"},
+          // C (champ de contrôle) sert de COMMAND ID / C (control field) is the COMMAND ID
+          {"name": "C", "size": 1, "role": "command_id", "color": "cmd",
+           "description": "Champ de contrôle (fonction, bit FCB)", "description_en": "Control field (function, FCB bit)",
+           "values": {
+             "0x40": {"fr": "SND_NKE : initialisation",        "en": "SND_NKE: initialisation"},
+             "0x5B": {"fr": "REQ_UD2 : demande données (FCB=1)", "en": "REQ_UD2: request data (FCB=1)"},
+             "0x7B": {"fr": "REQ_UD2 : demande données (FCB=0)", "en": "REQ_UD2: request data (FCB=0)"},
+             "0x5A": {"fr": "REQ_UD1 : demande alarmes",       "en": "REQ_UD1: request alarms"}
+           }},
+          {"name": "A", "size": 1, "role": "request_id", "color": "hdr",
+           "description": "Adresse primaire : 1 à 250", "description_en": "Primary address: 1 to 250",
+           "values": {
+             "0xFD": {"fr": "adressage secondaire",          "en": "secondary addressing"},
+             "0xFE": {"fr": "diffusion, avec réponse",       "en": "broadcast, with reply"},
+             "0xFF": {"fr": "diffusion, sans réponse",       "en": "broadcast, no reply"}
+           }},
+          {"name": "CS", "size": 1, "role": "crc", "algo": "sum8", "over": ["C", "A"], "color": "crc",
+           "description": "Somme sur 8 bits de C et A", "description_en": "8-bit sum of C and A"},
+          {"name": "STOP", "size": 1, "role": "value", "value": "0x16", "color": "hdr",
+           "description": "Fin de trame", "description_en": "End of frame"}
+        ]
+      },
+      {
+        "name": "Longue",
+        "description": "Trame longue : commande avec CI et données (SND_UD)",
+        "description_en": "Long frame: command with CI and data (SND_UD)",
+        "fields": [
+          {"name": "START", "size": 1, "role": "value", "value": "0x68", "color": "hdr"},
+          {"name": "L", "size": 1, "role": "length", "of": ["C", "A", "CI", "DATA"],
+           "description": "Longueur de C à la fin de DATA", "description_en": "Length from C to the end of DATA"},
+          // copy : recopie d'un champ précédent ; au décodage, une différence est une erreur.
+          // copy: repeats an earlier field; when decoding, a difference is an error.
+          {"name": "L (répété)", "size": 1, "role": "copy", "same_as": "L",
+           "description": "Longueur répétée", "description_en": "Repeated length"},
+          {"name": "START (répété)", "size": 1, "role": "value", "value": "0x68", "color": "hdr"},
+          {"name": "C", "size": 1, "role": "command_id", "color": "cmd",
+           "values": {
+             "0x53": {"fr": "SND_UD : envoi de données (FCB=0)", "en": "SND_UD: send data (FCB=0)"},
+             "0x73": {"fr": "SND_UD : envoi de données (FCB=1)", "en": "SND_UD: send data (FCB=1)"}
+           }},
+          {"name": "A", "size": 1, "role": "request_id", "color": "hdr"},
+          // CI : précisé par chaque commande (clé "header" des Msg_*.json).
+          // CI: set by each command ("header" key of the Msg_*.json files).
+          {"name": "CI", "size": 1, "role": "field", "default": "0x51", "color": "hdr",
+           "description": "Type de données (application)", "description_en": "Data type (application)",
+           "values": {
+             "0x50": {"fr": "remise à zéro de l'application", "en": "application reset"},
+             "0x51": {"fr": "envoi de données",               "en": "data send"},
+             "0x52": {"fr": "sélection adresse secondaire",   "en": "select secondary address"},
+             "0xB8": {"fr": "vitesse 300 bauds",              "en": "set baud rate 300"},
+             "0xBB": {"fr": "vitesse 2400 bauds",             "en": "set baud rate 2400"},
+             "0xBD": {"fr": "vitesse 9600 bauds",             "en": "set baud rate 9600"}
+           }},
+          {"name": "DATA", "role": "data"},
+          {"name": "CS", "size": 1, "role": "crc", "algo": "sum8", "over": ["C", "DATA"], "color": "crc"},
+          {"name": "STOP", "size": 1, "role": "value", "value": "0x16", "color": "hdr"}
+        ]
+      }
+    ]
+  },
+
+  // ------------------------------------------------------------------------------------------
+  //  RÉPONSE (compteur -> maître)  /  RESPONSE (meter -> master)
+  // ------------------------------------------------------------------------------------------
+  "rx": {
+    "variants": [
+      {
+        "name": "Accusé",
+        "description": "Accusé de réception E5", "description_en": "E5 acknowledge",
+        "fields": [
+          {"name": "ACK", "size": 1, "role": "value", "value": "0xE5", "color": "crc",
+           "description": "Commande reçue", "description_en": "Command received"}
+        ]
+      },
+      {
+        "name": "Longue",
+        "description": "RSP_UD : données du compteur", "description_en": "RSP_UD: meter data",
+        "fields": [
+          {"name": "START", "size": 1, "role": "value", "value": "0x68", "color": "hdr"},
+          {"name": "L", "size": 1, "role": "length", "of": ["C", "A", "CI", "DATA"]},
+          {"name": "L (répété)", "size": 1, "role": "copy", "same_as": "L"},
+          {"name": "START (répété)", "size": 1, "role": "value", "value": "0x68", "color": "hdr"},
+          {"name": "C", "size": 1, "role": "command_id", "color": "cmd",
+           "values": {
+             "0x08": {"fr": "RSP_UD : réponse",                    "en": "RSP_UD: response"},
+             "0x18": {"fr": "RSP_UD : réponse (accès demandé)",    "en": "RSP_UD: response (access demand)"}
+           }},
+          {"name": "A", "size": 1, "role": "request_id", "color": "hdr",
+           "description": "Adresse du compteur qui répond", "description_en": "Address of the replying meter"},
+          {"name": "CI", "size": 1, "role": "field", "color": "hdr",
+           "values": {
+             "0x72": {"fr": "données variables, en-tête long", "en": "variable data, long header"},
+             "0x7A": {"fr": "données variables, en-tête court", "en": "variable data, short header"},
+             "0x78": {"fr": "données variables, sans en-tête", "en": "variable data, no header"}
+           }},
+          {"name": "DATA", "role": "data",
+           "description": "En-tête (n° d'identification, fabricant…) puis enregistrements DIF/VIF",
+           "description_en": "Header (identification number, manufacturer…) then DIF/VIF records"},
+          {"name": "CS", "size": 1, "role": "crc", "algo": "sum8", "over": ["C", "DATA"], "color": "crc"},
+          {"name": "STOP", "size": 1, "role": "value", "value": "0x16", "color": "hdr"}
+        ]
+      }
+    ]
+  },
+
+  // M-Bus n'a pas de code d'erreur dans la trame : l'état est dans les données (octet « statut »).
+  // M-Bus has no error code in the frame: the state is in the data ("status" byte).
+  "errors": {},
+
+  "commands": "../msgLibrary/msgList/mbus"
+}

@@ -1,0 +1,92 @@
+{
+  "name": "serialhex",
+  "version": "0.1.0",
+  "description": "Trames hexa sur port série : format Message_*.json, SerialLink, intégration Electron et hooks React",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./react": {
+      "import": {
+        "types": "./dist/react/index.d.ts",
+        "default": "./dist/react/index.js"
+      },
+      "require": {
+        "types": "./dist/react/index.d.cts",
+        "default": "./dist/react/index.cjs"
+      }
+    },
+    "./electron/main": {
+      "import": {
+        "types": "./dist/electron/main.d.ts",
+        "default": "./dist/electron/main.js"
+      },
+      "require": {
+        "types": "./dist/electron/main.d.cts",
+        "default": "./dist/electron/main.cjs"
+      }
+    },
+    "./electron/preload": {
+      "import": {
+        "types": "./dist/electron/preload.d.ts",
+        "default": "./dist/electron/preload.js"
+      },
+      "require": {
+        "types": "./dist/electron/preload.d.cts",
+        "default": "./dist/electron/preload.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "prepare": "tsup"
+  },
+  "peerDependencies": {
+    "electron": ">=22",
+    "react": ">=18",
+    "serialport": ">=12"
+  },
+  "peerDependenciesMeta": {
+    "electron": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    },
+    "serialport": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.3.3",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "electron": "^45.1.0",
+    "jsdom": "^30.1.3",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "serialport": "^13.0.0",
+    "tsup": "^9.0.0",
+    "typescript": "~5.9",
+    "vitest": "^5.0.5"
+  }
+}

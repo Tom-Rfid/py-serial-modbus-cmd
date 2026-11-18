@@ -1,7 +1,10 @@
 """
 ui/replay/options.py — Rythme du replay et timeout de réponse.
 
-    (•) Temps d'origine [x1]  ( ) Délai fixe [200] ms   Timeout [500] ms  [x] Comparer
+    (•) Temps d'origine [x1]  ( ) Délai fixe [200] ms   Timeout [500] ms  [x] Comparer  [ ] Décoder
+
+« Décoder » : une ligne cliquée dans le tableau est chargée dans l'onglet Protocole (TX dans la
+Requête, RX dans la Réponse, cadre rempli sur fond gris foncé).
 """
 import tkinter as tk
 from tkinter import ttk
@@ -10,6 +13,7 @@ from core.trace import replay_delays
 
 from .constants import SPEEDS
 from ui.i18n import _
+from ui.tooltip import ToolTip
 
 
 class PlaybackOptions(ttk.Frame):
@@ -21,6 +25,7 @@ class PlaybackOptions(ttk.Frame):
         self.fixed_ms = tk.StringVar(value="200")
         self.timeout_var = tk.StringVar(value=str(int(timeout_ms)))
         self.compare = tk.BooleanVar(value=True)
+        self.decode = tk.BooleanVar(value=False)
         self._build_rhythm(on_change)
         self._build_checks()
 
@@ -45,6 +50,10 @@ class PlaybackOptions(ttk.Frame):
         ttk.Entry(self, textvariable=self.timeout_var, width=5).pack(side="left")
         ttk.Label(self, text="ms").pack(side="left", padx=(2, 10))
         ttk.Checkbutton(self, text=_("Comparer"), variable=self.compare).pack(side="left")
+        decode = ttk.Checkbutton(self, text=_("Décoder"), variable=self.decode)
+        decode.pack(side="left", padx=(10, 0))
+        ToolTip(decode, _("Ligne cliquée chargée dans l'onglet Protocole : TX dans la Requête, RX dans la "
+                          "Réponse (cadre sur fond gris foncé)"))
 
     # ------------------------------------------------------------------
     # Valeurs

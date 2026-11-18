@@ -72,6 +72,7 @@ class TracesMixin:
         self.to_replay(frame, msg["name"])
 
     def decode_in_protocol(self, direction, data):
-        """Bouton « Décoder dans Protocole » du replay : la trame est décodée dans l'onglet Protocole."""
-        self.protocol_panel.show_for_decode(data, self.kind_of(direction))
+        """Ligne du replay envoyée dans l'onglet Protocole (case « Décoder » ou bouton « Décoder
+        dans Protocole ») : TX dans la Requête, RX dans la Réponse, cadre rempli en gris foncé."""
+        self.protocol_panel.load_from_replay(direction, data)
         self.tabs.select(self.protocol_panel)

@@ -3,7 +3,8 @@ ui/protocol/panel.py — Classe ProtocolPanel : création de l'onglet, choix du 
 
 La partie Requête est dans query.py (recherche et favoris de CMD TX : command_search.py), la
 partie Réponse dans response.py. Les champs de DATA se modifient directement dans le tableau
-de la trame (widgets.py).
+de la trame (widgets.py). Ligne du Replay chargée dans la Requête ou la Réponse : from_replay.py
+(cadre rempli sur fond gris foncé : highlight.py).
 
 Le séparateur Requête / Réponse se place tout seul pour que les deux tableaux se voient en
 entier (_fit_panes) ; déplacé à la main, il reste où on l'a mis jusqu'au prochain changement
@@ -17,6 +18,7 @@ from core.protocol import DEFAULT_PROTOCOL, QUERY
 
 from .constants import AUTO, GREY, MANUAL, RAW
 from .command_search import CommandSearchMixin
+from .from_replay import FromReplayMixin
 from .query import QueryMixin
 from .response import ResponseMixin
 from ui.i18n import _
@@ -24,7 +26,7 @@ from ui.i18n import _
 RX_MIN_HEIGHT = 170     # hauteur minimale gardée pour la Réponse quand la place manque (px)
 
 
-class ProtocolPanel(QueryMixin, CommandSearchMixin, ResponseMixin, ttk.Frame):
+class ProtocolPanel(QueryMixin, CommandSearchMixin, ResponseMixin, FromReplayMixin, ttk.Frame):
     def __init__(self, master, settings, on_send, on_protocol=None, on_to_replay=None, on_save=None):
         """
         settings                 : core.settings.Settings
@@ -49,6 +51,7 @@ class ProtocolPanel(QueryMixin, CommandSearchMixin, ResponseMixin, ttk.Frame):
         self._response_box = self._build_response_box(self.panes)
         self.panes.add(self._query_box, weight=1)
         self.panes.add(self._response_box, weight=1)
+        self._init_highlight()          # ligne du Replay chargée : cadre sur fond gris foncé
         # Un tableau change de hauteur, ou la fenêtre change de taille : séparateur replacé
         self.query_table.on_resize = self._fit_panes
         self.decode_table.on_resize = self._fit_panes

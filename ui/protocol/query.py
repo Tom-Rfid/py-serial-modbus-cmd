@@ -24,7 +24,6 @@ from ui.save_dialog import ask_message_name, file_name_for
 
 from .constants import GREY, MANUAL, MANUAL_DATA, MONO, REPLAY_ARROW
 from .widgets import FieldTable
-from ui.theme import data_entry_style
 from ui.tooltip import ToolTip
 from ui.i18n import _, tr
 
@@ -52,7 +51,7 @@ class QueryMixin:
         self.hidden_chk = ttk.Checkbutton(row, text=_("Masquées"), variable=self.show_hidden,
                                           command=self._on_show_hidden)
 
-        # --- REQUEST ID et COMMAND ID
+        # --- REQUEST ID, COMMAND ID, données prédéfinies, description ; Sauvegarder / Copier à droite
         row = ttk.Frame(box)
         row.pack(fill="x", pady=(4, 0))
         self.rid_var = tk.StringVar(value="0x00")      # en hexa, sur la taille du champ
@@ -81,21 +80,24 @@ class QueryMixin:
         self.variant_lbl = ttk.Label(row, text="Format")
         self.variant_cb = ttk.Combobox(row, textvariable=self.variant_var, state="readonly", width=16)
         self.variant_cb.bind("<<ComboboxSelected>>", lambda e: self.update_query())
-
-        # --- Données : prédéfinies ("presets" de la commande) et description à droite ;
-        # en saisie manuelle, DATA en hexa à la place (une seule ligne dans les deux cas)
-        row = ttk.Frame(box)
-        row.pack(fill="x", pady=(4, 0))
-        ttk.Label(row, text=_("Données"), width=12).pack(side="left")
+        # Sauvegarder… et Copier, tout à droite de la ligne (placés avant la description,
+        # qui prend la place restante et se coupe si elle est trop longue)
+        ttk.Button(row, text=_("Copier"), command=self._copy_query).pack(side="right", padx=(4, 0))
+        if self.on_save:
+            ttk.Button(row, text=_("Sauvegarder…"), command=self._save_query).pack(side="right")
+        # Données prédéfinies ("presets" de la commande) : liste affichée seulement si la
+        # commande en a (_build_form)
         self.preset_var = tk.StringVar(value=MANUAL_DATA)
-        self.preset_cb = ttk.Combobox(row, textvariable=self.preset_var, state="disabled",
-                                      values=[MANUAL_DATA], width=28)
+        self.preset_cb = ttk.Combobox(row, textvariable=self.preset_var, state="readonly",
+                                      values=[MANUAL_DATA], width=22)
         self.preset_cb.bind("<<ComboboxSelected>>", lambda e: self._on_preset())
-        self.data_var = tk.StringVar()          # DATA en hexa, mode manuel
+        ToolTip(self.preset_cb, _("Données prédéfinies de la commande"))
+        # Description de la commande (en gris, une seule ligne)
+        self.desc_lbl = ttk.Label(row, foreground=GREY)
+        self.desc_lbl.pack(side="left", padx=(12, 8), fill="x", expand=True)
+        # DATA en hexa en saisie manuelle : modifiée dans la ligne DATA du tableau
+        self.data_var = tk.StringVar()
         self.data_var.trace_add("write", lambda *_: self.update_query())
-        self.data_entry = ttk.Entry(row, textvariable=self.data_var, font=MONO, style=data_entry_style())   # DATA en bleu
-        self.desc_lbl = ttk.Label(row, foreground=GREY)        # une seule ligne (coupée si trop longue)
-        self.desc_lbl.pack(side="right", padx=(10, 0), fill="x", expand=True)
         for var in (self.rid_var, self.cmd_var):
             var.trace_add("write", lambda *_: self.update_query())
 
@@ -110,25 +112,20 @@ class QueryMixin:
         return box
 
     def _build_query_bottom(self, box):
-        """Bas du cadre : trame hexa sur toute la largeur, boutons sur la ligne du dessous.
+        """Bas du cadre, sur une seule ligne : trame hexa, puis Envoyer et « → Replay » à droite.
         Placé en bas AVANT le tableau (before=...) : toujours visible, c'est le tableau qui
         rétrécit si la place manque."""
         bottom = ttk.Frame(box)
         bottom.pack(side="bottom", fill="x", pady=(4, 0), before=self.query_table)
-        # Trame en couleurs (en-tête gris, COMMAND ID gras, CRC vert) : toute la largeur,
-        # et autant de lignes qu'il faut (4 au plus) pour la voir en entier
-        self.query_hex = HexView(bottom, height=1, max_lines=4)
-        self.query_hex.pack(side="top", fill="x")
-        # Boutons sous la trame, à droite : ils ne prennent plus de place à la trame
-        buttons = ttk.Frame(bottom)
-        buttons.pack(side="top", fill="x", pady=(4, 0))
+        # Boutons placés en premier, à droite : ils restent visibles
         if self.on_to_replay:
-            ttk.Button(buttons, text=REPLAY_ARROW, command=self._query_to_replay).pack(side="right", padx=(4, 0))
-        self.send_btn = ttk.Button(buttons, text=_("Envoyer"), command=self.send_query)
-        self.send_btn.pack(side="right")
-        ttk.Button(buttons, text=_("Copier"), command=self._copy_query).pack(side="right", padx=4)
-        if self.on_save:
-            ttk.Button(buttons, text=_("Sauvegarder…"), command=self._save_query).pack(side="right")
+            ttk.Button(bottom, text=REPLAY_ARROW, command=self._query_to_replay).pack(side="right", padx=(4, 0))
+        self.send_btn = ttk.Button(bottom, text=_("Envoyer"), command=self.send_query)
+        self.send_btn.pack(side="right", padx=(8, 0))
+        # Trame en couleurs (en-tête gris, COMMAND ID gras, CRC vert) : la place restante, et
+        # autant de lignes qu'il faut (4 au plus) pour la voir en entier
+        self.query_hex = HexView(bottom, height=1, max_lines=4)
+        self.query_hex.pack(side="left", fill="x", expand=True)
 
     def _update_get_send(self):
         """Bouton Envoyer de la ligne COMMAND ID : visible pour une commande Get seulement."""
@@ -139,7 +136,9 @@ class QueryMixin:
             self.get_send_btn.pack_forget()
 
     def _on_command(self):
-        """Commande choisie dans la liste : COMMAND ID et formulaire suivent."""
+        """Commande choisie dans la liste : COMMAND ID et formulaire suivent. Les cadres Requête
+        et Réponse reviennent en gris clair (s'ils montraient une ligne du Replay)."""
+        self.clear_highlight()
         if self.cmd_choice.get() not in self._cmd_labels:
             self.cmd_choice.set(MANUAL)
         self._cmd_current = self.cmd_choice.get()
@@ -155,23 +154,20 @@ class QueryMixin:
         else:
             self.cmd_entry.state(["!readonly"])
             self.desc_lbl.config(text="")
-        # Menu des données prédéfinies : actif seulement si la commande en a
-        presets = [p["name"] for p in self.cmd.presets] if self.cmd else []
-        self.preset_cb["values"] = [MANUAL_DATA] + presets
-        self.preset_cb.state(["!disabled", "readonly"] if presets else ["disabled"])
         self.preset_var.set(MANUAL_DATA)
         self._build_form()
         self.update_query()
 
     def _build_form(self):
-        """Ligne « Données » : DATA en hexa (saisie manuelle) ou menu des données prédéfinies.
-        Les champs de DATA d'une commande se modifient dans le tableau de la trame."""
-        if self.cmd is None:
-            self.preset_cb.pack_forget()
-            self.data_entry.pack(side="left", fill="x", expand=True, before=self.desc_lbl)
+        """Liste des données prédéfinies : affichée (avant la description) seulement si la commande
+        en a. DATA (champs, ou hexa brut en saisie manuelle) se modifie dans le tableau de la trame."""
+        presets = [p["name"] for p in self.cmd.presets] if self.cmd else []
+        if presets:
+            self.preset_cb["values"] = [MANUAL_DATA] + presets
+            self.preset_cb.pack(side="left", padx=(12, 0), before=self.desc_lbl)
         else:
-            self.data_entry.pack_forget()
-            self.preset_cb.pack(side="left", before=self.desc_lbl)
+            self.preset_cb.pack_forget()
+        if self.cmd is not None:
             # Valeurs mémorisées pour cette commande, sinon valeurs par défaut du JSON
             self.tx_values.setdefault(self.cmd.label, {k: str(v) for k, v in defaults(self.cmd.tx).items()})
 

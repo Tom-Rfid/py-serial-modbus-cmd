@@ -83,7 +83,9 @@ request #0x01 · Read measurements · 4 B · CRC OK   => converted values
 
 - the **interval** with the row above and the row below;
 - the frame in colour and its decoding by the current protocol (command, error code, converted values);
-- **Decode in Protocol**: the frame is shown in the Response part of the Protocol tab, decoded field by field ("Follow received responses" is then unticked so that it stays displayed).
+- **Decode in Protocol**: a **TX** row (complete request of the current protocol) is loaded in the **Request** part: command found from its COMMAND ID, REQUEST ID and DATA (raw, the fields show its decoding), editable then sendable again. An **RX** row (or a TX that is not a request of the protocol) is shown in the **Response** part, decoded field by field ("Follow received responses" is then unticked so that it stays displayed). The filled frame gets the **dark grey background** of the Replay panel; both frames go back to light grey as soon as a new command is chosen in TX CMD.
+- **Decode** checkbox (next to **Compare**): same thing on each click on a table row, without the button (nothing is loaded during a replay).
+- **■ Stop** is greyed out while nothing is running; **▶ Replay** is greyed out during a replay or step by step.
 
 | Result | Icon | Colour | Meaning |
 |---|---|---|---|

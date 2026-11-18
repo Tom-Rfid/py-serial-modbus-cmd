@@ -83,7 +83,9 @@ requête #0x01 · Lire mesures · 4 o · CRC OK   => valeurs converties
 
 - l'**intervalle** avec la ligne du dessus et celle du dessous ;
 - la trame en couleurs et son décodage par le protocole en cours (commande, code d'erreur, valeurs converties) ;
-- **Décoder dans Protocole** : la trame s'affiche dans la partie Réponse de l'onglet Protocole, décodée champ par champ (« Suivre les réponses reçues » est alors décoché pour qu'elle reste affichée).
+- **Décoder dans Protocole** : une ligne **TX** (requête complète du protocole en cours) est chargée dans la partie **Requête** : commande retrouvée d'après son COMMAND ID, REQUEST ID et DATA (brute, les champs montrent son décodage), modifiable puis renvoyable. Une ligne **RX** (ou une TX qui n'est pas une requête du protocole) s'affiche dans la partie **Réponse**, décodée champ par champ (« Suivre les réponses reçues » est alors décoché pour qu'elle reste affichée). Le cadre rempli passe sur le **fond gris foncé** du Replay ; les deux cadres reviennent en gris clair dès qu'on choisit une nouvelle commande dans CMD TX.
+- Case **Décoder** (à côté de **Comparer**) : même chose à chaque clic sur une ligne du tableau, sans passer par le bouton (rien n'est chargé pendant un replay).
+- **■ Arrêter** est grisé tant que rien ne tourne ; **▶ Rejouer** est grisé pendant un replay ou un pas à pas.
 
 | Résultat | Icône | Couleur | Signification |
 |---|---|---|---|

@@ -4,7 +4,7 @@ les barres, le tableau, le détail de ligne et le moteur du replay.
 
     ┌ FileBar      [Ouvrir…] [Nouvelle] Nom [new_trace_…] .csv * [Enregistrer] [Enregistrer sous…] ┐
     │ analyse des temps                                                                    │
-    │ PlaybackOptions  rythme, timeout, comparer                                           │
+    │ PlaybackOptions  rythme, timeout, comparer, décoder (ligne cliquée -> Protocole)     │
     │ EditBar      [+ Ajouter] [Supprimer] [Monter] [Descendre]  → : insère / remplace     │
     │ lecture          [⏭ Pas à pas]  [▶ Rejouer]  [■ Arrêter]   état du replay / messages │
     │ TraceTable   une ligne par ligne du fichier                                          │
@@ -44,7 +44,8 @@ class ReplayPanel(ttk.Frame):
         log(texte, tag)   : écrit dans le moniteur
         timeout_ms        : timeout de réponse proposé (celui du moniteur)
         describe, style   : décodage et couleurs du protocole (détail de ligne)
-        on_decode(dir, data): bouton « Décoder dans Protocole »
+        on_decode(dir, data): bouton « Décoder dans Protocole », et ligne cliquée si la case
+                              « Décoder » est cochée
         """
         _setup_styles(master)
         super().__init__(master, padding=(6, 0, 0, 0), style="Replay.TFrame")
@@ -54,6 +55,7 @@ class ReplayPanel(ttk.Frame):
         self.ex_list = []           # échanges (une requête TX + ses réponses RX)
         self.tx_rows = []           # échange k -> position de sa ligne TX
         self.player = ReplayPlayer(self, send, log)
+        self.on_decode = on_decode or (lambda d, b: None)
         self._build(timeout_ms, describe or (lambda d, b: None), style or (lambda d, b: None),
                     on_decode or (lambda d, b: None))
         _restyle(self)
@@ -94,9 +96,12 @@ class ReplayPanel(ttk.Frame):
         self.start_btn.pack(side="left", padx=(14, 0))
         ToolTip(self.start_btn, _("Rejoue toute la trace au rythme choisi (temps d'origine ou délai fixe) "
                                   "et compare les réponses"))
-        stop_btn = ttk.Button(bar, text=_("■ Arrêter"), command=self.stop, style="Stop.TButton")
-        stop_btn.pack(side="left", padx=(14, 0))
-        ToolTip(stop_btn, _("Arrête le replay ou le pas à pas"))
+        # Arrêter : grisé tant que rien ne tourne (ni replay, ni pas à pas) ; Rejouer : grisé
+        # pendant un replay. On voit ainsi l'état d'un coup d'œil (_set_running).
+        self.stop_btn = ttk.Button(bar, text=_("■ Arrêter"), command=self.stop, style="Stop.TButton")
+        self.stop_btn.pack(side="left", padx=(14, 0))
+        self.stop_btn.state(["disabled"])
+        ToolTip(self.stop_btn, _("Arrête le replay ou le pas à pas"))
         self.bind_all("<F8>", lambda e: self.step() if self.winfo_ismapped() else None, add="+")
         # Ligne d'état sous les boutons, sur toute la largeur (messages longs du pas à pas)
         self.status_lbl = ttk.Label(self, text="", wraplength=600, justify="left")
@@ -113,7 +118,9 @@ class ReplayPanel(ttk.Frame):
         self.status_lbl.config(text=text, foreground=RED if error else "")
 
     def _set_running(self, running):
+        """Boutons selon l'état : Rejouer grisé et Arrêter actif pendant un replay ou un pas à pas."""
         self.start_btn.state(["disabled"] if running else ["!disabled"])
+        self.stop_btn.state(["!disabled"] if running else ["disabled"])
         stepping = running and self.player.step_mode
         self.step_btn.config(text=_("⏭ Suivant") if stepping else _("⏭ Pas à pas"))
         self.step_btn.state(["disabled"] if running and not stepping else ["!disabled"])
@@ -136,7 +143,7 @@ class ReplayPanel(ttk.Frame):
         self.file_bar.show(name, self.doc.modified)
         self.analysis_lbl.config(text=self._analysis_text())
         self.update_delays()
-        self._on_select(self.table.selected_rows())
+        self._on_select(self.table.selected_rows(), clicked=False)
 
     def _analysis_text(self):
         if not self.doc.events:
@@ -160,13 +167,18 @@ class ReplayPanel(ttk.Frame):
     def _changed(self, select=None):
         self.refresh(select)
 
-    def _on_select(self, rows):
-        """Ligne cliquée : détail (intervalle avec les voisines, couleurs, décodage)."""
+    def _on_select(self, rows, clicked=True):
+        """Ligne cliquée : détail (intervalle avec les voisines, couleurs, décodage) et, si la case
+        « Décoder » est cochée, chargement dans l'onglet Protocole (pas pendant un replay).
+        clicked=False : simple réaffichage (refresh), rien n'est chargé."""
         if len(rows) != 1 or rows[0] >= len(self.doc.events):
             self.detail.clear()
             return
         row = rows[0]
-        self.detail.show(row, self.doc.events[row], self.doc.gaps(row))
+        event = self.doc.events[row]
+        self.detail.show(row, event, self.doc.gaps(row))
+        if clicked and self.options.decode.get() and not self.running:
+            self.on_decode(event.direction, event.data)
 
     # ------------------------------------------------------------------
     # Fichier

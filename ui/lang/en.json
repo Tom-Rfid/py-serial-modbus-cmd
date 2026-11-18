@@ -278,6 +278,8 @@
   "auto req_id : REQUEST ID +1 après chaque envoi réussi (0xFF → 0x00)": "auto req_id: REQUEST ID +1 after each successful send (0xFF → 0x00)",
   " ; {0} message(s) identique(s) déjà présent(s), ignoré(s)": "; {0} identical message(s) already present, skipped",
   "DATA : hexa invalide": "DATA: invalid hex",
+  "Ligne cliquée chargée dans l'onglet Protocole : TX dans la Requête, RX dans la Réponse (cadre sur fond gris foncé)": "Clicked row loaded in the Protocol tab: TX in the Request, RX in the Response (frame on a dark grey background)",
+  "Données prédéfinies de la commande": "Preset data of the command",
   "{0} : {1} octet(s) attendu(s)": "{0}: {1} byte(s) expected",
   "DATA brute saisie : les champs montrent son décodage ; vider DATA = valeurs des champs": "Raw DATA entered: the fields show its decoding; clear DATA = back to field values",
   "Le message « {0} » existe déjà dans {1}.\n\nOui : le remplacer\nNon : garder les deux (le nouveau devient « {2} »)\nAnnuler : ne rien sauvegarder": "Message \"{0}\" already exists in {1}.\n\nYes: replace it\nNo: keep both (the new one becomes \"{2}\")\nCancel: save nothing",

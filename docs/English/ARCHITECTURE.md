@@ -63,6 +63,8 @@ ui/                        Tkinter interface
     command_search.py      TX CMD: search while typing, suggestions, favourites
     response.py            Response (RX) part and monitor summaries
     widgets.py             FieldTable (frame table, editable in place)
+    from_replay.py         Replay row loaded in the Request or the Response
+    highlight.py           frame filled from the Replay on a dark grey background
     constants.py           labels and colours
   replay/                  Replay panel (to the right of the tabs)
     panel.py               ReplayPanel: links the elements below
